@@ -30,7 +30,7 @@
  *	@return				pointeur vers le tableau d'etiquettes binaires
  */
 
-vuint8** routine_FrameDifference(vuint8** It, vuint8** It_1,
+vuint8** routine_FrameDifference_SSE2(vuint8** It, vuint8** It_1,
 	int size_h, int size_l, vuint8** Ot, vuint8** Et)
 {
 	int i, j;
@@ -58,7 +58,7 @@ vuint8** routine_FrameDifference(vuint8** It, vuint8** It_1,
  			_mm_store_si128(&Ot[i][j+1], a_1);
 
 			// Step#2: thresholding and Et estimation
-			//Pourquoi ça marche pas quand on le met pas dans le test directemetn ? 
+			//Pourquoi ça marche pas quand on le met pas dans le test directemetn ?
 			//Ot[i][j] = _mm_sub_epi8(Ot[i][j], v_128);
 			//v_theta = _mm_sub_epi8(v_theta, v_128);
 			a_0 = _mm_cmplt_epi8(_mm_sub_epi8(Ot[i][j], v_128), _mm_sub_epi8(v_theta, v_128));
@@ -84,16 +84,16 @@ vuint8** routine_FrameDifference(vuint8** It, vuint8** It_1,
  *	@param size_h		Hauteur de l'iamge
  * 	@return				Pointeur vers le tableau de Ms
  */
-vuint8** SigmaDelta_step0(vuint8** V, vuint8** M, vuint8** It,
+vuint8** SigmaDelta_step0_SSE2(vuint8** V, vuint8** M, vuint8** It,
 	int size_h, int size_l)
 {
 	int i, j;
 
 	vuint8 v_vmin = init_vuint8(VMIN);
- 
+
 	for(i = 0; i < size_h; i++)	{
 		for(j = 0; j < size_l; j++)	{
-			_mm_store_si128(&V[i][j], v_vmin);	
+			_mm_store_si128(&V[i][j], v_vmin);
 			_mm_store_si128(&M[i][j], It[i][j]);
 
 			_mm_store_si128(&V[i][j+1], v_vmin);
@@ -116,7 +116,7 @@ vuint8** SigmaDelta_step0(vuint8** V, vuint8** M, vuint8** It,
  *	@param Et			Etiquette binaire de sortie
  *	@return 			Pointeur vers tableau d'etiquettes binaires
  */
-vuint8** SigmaDelta_1step(vuint8** It_1, vuint8** Ot,
+vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 	int size_h, int size_l, vuint8** M, vuint8** V, vuint8** Et)
 {
 	int i, j, k;
@@ -185,37 +185,37 @@ vuint8** SigmaDelta_1step(vuint8** It_1, vuint8** Ot,
 			a = _mm_cmplt_epi8(_mm_sub_epi8(V[i][j], v_128), _mm_sub_epi8(It_1[i][j], v_128));
 			a = _mm_and_si128(a, v_0x01);
 			a = _mm_add_epi8(V[i][j], a);
-			_mm_store_si128(&V[i][j], a); 
+			_mm_store_si128(&V[i][j], a);
 
 			b = _mm_cmplt_epi8(_mm_sub_epi8(V[i][j+1], v_128), _mm_sub_epi8(It_1[i][j+1], v_128));
 			b = _mm_and_si128(b, v_0x01);
 			b = _mm_add_epi8(V[i][j+1], b);
-			_mm_store_si128(&V[i][j+1], b); 
+			_mm_store_si128(&V[i][j+1], b);
 			// Si V > NxIt_1
 			a = _mm_cmplt_epi8(_mm_sub_epi8(It_1[i][j], v_128), _mm_sub_epi8(V[i][j], v_128));
 			a = _mm_and_si128(a, v_0x01);
 			a = _mm_sub_epi8(V[i][j], a);
-			_mm_store_si128(&V[i][j], a); 
+			_mm_store_si128(&V[i][j], a);
 
 			b = _mm_cmplt_epi8(_mm_sub_epi8(It_1[i][j+1], v_128), _mm_sub_epi8(V[i][j+1], v_128));
 			b = _mm_and_si128(b, v_0x01);
 			b = _mm_sub_epi8(V[i][j+1], b);
-			_mm_store_si128(&V[i][j+1], b); 
+			_mm_store_si128(&V[i][j+1], b);
 			// Clamp to [VMIN, VMAX]
 			a = _mm_min_epu8(V[i][j], v_vmax);
 			a = _mm_max_epu8(a, v_vmin);
-			_mm_store_si128(&V[i][j], a); 
+			_mm_store_si128(&V[i][j], a);
 
 			b = _mm_min_epu8(V[i][j+1], v_vmax);
 			b = _mm_max_epu8(b, v_vmin);
-			_mm_store_si128(&V[i][j+1], b); 
+			_mm_store_si128(&V[i][j+1], b);
 		}
 	}
 
-	// Step#4: Et estimation 
+	// Step#4: Et estimation
 	for(i = 0; i < size_h; i++)	{
 		for(j = 0; j < size_l; j++)	{
-			// Si Ot < V 
+			// Si Ot < V
 			a = _mm_cmplt_epi8(_mm_sub_epi8(Ot[i][j], v_128), _mm_sub_epi8(V[i][j], v_128));
 			//a = _mm_and_si128(a, v_0x01);
 			a = _mm_andnot_si128(a, v_255);
@@ -230,8 +230,3 @@ vuint8** SigmaDelta_1step(vuint8** It_1, vuint8** Ot,
 
 	return Et;
 }
-
-
-
-
-
