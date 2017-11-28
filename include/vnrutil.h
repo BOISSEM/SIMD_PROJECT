@@ -201,7 +201,6 @@ void zero_vsi32matrix(vsint32  **m, int i0, int i1, int j0, int j1);
 void zero_vui32matrix(vuint32  **m, int i0, int i1, int j0, int j1);
 void zero_vf32matrix (vfloat32 **m, int i0, int i1, int j0, int j1);
 
-
 #ifdef __cplusplus
 }
 #endif

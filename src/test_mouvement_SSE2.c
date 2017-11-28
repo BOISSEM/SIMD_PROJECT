@@ -16,7 +16,6 @@
 #include "vnrdef.h"
 #include "nrdef.h"
 #include "vnrutil.h"
-#include "mymacro.h"
 
 #include "mouvement_SSE2.h"
 #include "test_mouvement_SSE2.h"
@@ -232,7 +231,7 @@ void f_test_sd_SSE2()
 
 	/*------ Test fonctions ------*/
     //============= TEST 1 ===============
-    img1_1[2][1] = init_vuint8_all(25, 25, 25, 0, 0, 1, 0, 255, 0, 1, 0, 1, 0, 1, 0, 1);
+    img1_1[2][1] = init_vuint8_all(25, 25, 25, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1);
 	img1_1[3][0] = init_vuint8_all(0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 150, 150);
 	img1_1[3][1] = init_vuint8_all(128, 127, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0);
 	img1_1[4][0] = init_vuint8_all(0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 230, 230);
@@ -263,15 +262,8 @@ void f_test_sd_SSE2()
 
 	img_etq1_1 = SigmaDelta_1step_SSE2(img1_1, img_dif1_1, SIZE_H, SIZE_L, img_moy1_0, img_var1_0, img_etq1_1);
 
-	display_vui8matrix(img_moy1_0, 0, SIZE_H, 0, SIZE_L, " %3d ", "img_moy1_0");
-	printf("\n");
-
-	display_vui8matrix(img_var1_0, 0, SIZE_H, 0, SIZE_L, " %3d ", "img_var1_0");
-	printf("\n");
-
 	display_vui8matrix(img_etq1_1, 0, SIZE_H, 0, SIZE_L, " %3d ", "img_etq1_1");
 	printf("\n");
-
 
 	printf("\n======================\n");
 
