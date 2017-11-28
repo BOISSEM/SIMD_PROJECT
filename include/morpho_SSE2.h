@@ -173,4 +173,4 @@ void open5_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** bu
  */
 void close5_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer);
 
-#endif  // __MORPHO_H_SSE2__
+#endif  // __MORPHO_SSE2_H__

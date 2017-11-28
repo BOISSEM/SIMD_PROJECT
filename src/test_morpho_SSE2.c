@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "debug_macro.h"
+
 #include "nrdef.h"
 #include "vnrdef.h"
 #include "vnrutil.h"
@@ -27,6 +29,7 @@ void f_test_macro(void)
     vuint8 a, b, c, d, e;
     vuint8 au, cu; // unaligned vectorvec_left1
     vuint8 a3, a5; // add3 add5
+    vuint8 am3, am5;
     puts("------------------");
     puts("--- test_macro ---");
     puts("------------------"); puts("");
@@ -69,11 +72,10 @@ void f_test_dilate_bin3_SSE2()
     int mi0, mi1, mj0, mj1;
     vuint8 **img1, **img2;
 
-    int l = 16*2;
-    int h = 4;
-    int bord = 2;
-
     card = card_vuint8();
+    int l = card*1;
+    int h = 4;
+    int bord = 1;
 
     si0 = 0;        si0b = si0 - bord;
     si1 = h-1;      si1b = si1 + bord;
@@ -87,13 +89,22 @@ void f_test_dilate_bin3_SSE2()
     img1 = vui8matrix(vi0b, vi1b, vj0b, vj1b);
     img2 = vui8matrix(vi0b, vi1b, vj0b, vj1b);
 
-    zero_vsi8matrix(img1, vi0b, vi1b, vj0b, vj1b);
-    zero_vsi8matrix(img2, vi0b, vi1b, vj0b, vj1b);
-    init_vui8matrix_param(img1, vi0, vi1, vj0, vj1, 1, 1, l);
+    img1[vi0b] = img1[vi0];
+    img1[vi1b] = img1[vi1];
+    img2[vi0b] = img2[vi0];
+    img2[vi1b] = img2[vi1];
 
-    display_vui8matrix(img1, vi0, vi1, vj0, vj1, " %3d ", "img1 = ");
+    zero_vsi8matrix(img1, vi0, vi1, vj0b, vj1b);
+    zero_vsi8matrix(img2, vi0b, vi1b, vj0b, vj1b);
+    init_vui8matrix_param(img1, vi0, vi1, vj0, vj1, 1, 1, 1);
+
+    display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 = ");
+    display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = ");
 
     dilate_bin3_SSE2(img1, vi1+1, vj1+1, img2);
+
+    display_vui8matrix(img2, vi0, vi1, vj0, vj1, " %3d ", "img2 = ");
+
 }
 
 void f_test_morpho_SSE2()
