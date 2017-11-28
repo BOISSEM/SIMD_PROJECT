@@ -7,8 +7,8 @@
 	Prototype des algorithmes SIMD
 	de detection de mouvement (non optimisés)
 ----------------------------------------------- */
-#ifndef __MOUVEMENT_H__
-#define __MOUVEMENT_H__
+#ifndef __MOUVEMENT_SSE2_H__
+#define __MOUVEMENT_SSE2_H__
 
 #define NB_IMAGE 200
 #define THETA 10
@@ -58,4 +58,4 @@ vuint8** SigmaDelta_step0_SSE2(vuint8** V, vuint8** M, vuint8** It,
 vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 	int size_h, int size_l, vuint8** M, vuint8** V, vuint8** Et);
 
-#endif //__MOUVEMENT_H__
+#endif //__MOUVEMENT_SSE2_H__

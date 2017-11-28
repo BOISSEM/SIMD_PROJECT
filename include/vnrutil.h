@@ -19,16 +19,16 @@ extern "C" {
 #include <xmmintrin.h>
 #include <emmintrin.h>
 #include <mmintrin.h>
-    
+
 #include "nrdef.h"
 #include "vnrdef.h"
-    
-    
+
+
 //#pragma message(" - include vnralloc.h")
-    
+
 //#include "vdef.h"
 //#define LINEAR_ALLOCATION 1
-    
+
 /*
  * ifdef: contiguous memory allocation
  * from one line to an other

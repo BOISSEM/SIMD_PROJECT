@@ -1,5 +1,5 @@
 /* -----------------------------------------------
-	mouvement.c
+	mouvement_SSE2.c
 	Edité par Martin Boisse
 	Le 20 Octobre 2018
 
@@ -13,10 +13,10 @@
 #include <string.h>
 #include <math.h>
 
-#include "vnrdef.h"
 #include "nrdef.h"
-#include "mouvement_SSE2.h"
+#include "vnrdef.h"
 #include "vnrutil.h"
+#include "mouvement_SSE2.h"
 
 /**
  *	Routine de l'algorithme de Frame Difference
