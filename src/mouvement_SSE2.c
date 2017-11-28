@@ -46,10 +46,11 @@ vuint8** routine_FrameDifference_SSE2(vuint8** It, vuint8** It_1,
  	// Step#1: Ot Computation
  	for(i = 0; i < size_h; i++)	{
  		for(j = 0; j < size_l; j++)	{
- 			// On peut imaginer un fork ici...
+ 			// a_0 <- abs(It_1, It)
  			a_0 = _mm_min_epu8(It_1[i][j], It[i][j]);
  			b_0 = _mm_max_epu8(It_1[i][j], It[i][j]);
  			a_0 = _mm_sub_epi8(b_0, a_0);
+ 			// Ot <- a_0
  			_mm_store_si128(&Ot[i][j], a_0);
 
  			a_1 = _mm_min_epu8(It_1[i][j+1], It[i][j+1]);
@@ -58,11 +59,19 @@ vuint8** routine_FrameDifference_SSE2(vuint8** It, vuint8** It_1,
  			_mm_store_si128(&Ot[i][j+1], a_1);
 
 			// Step#2: thresholding and Et estimation
+<<<<<<< HEAD
+			//Pourquoi ça marche pas quand on le met pas dans le test directemetn ? 
+			// a_0 <- 255 si Ot < THETA
+			//		  0	sinon 
+=======
 			//Pourquoi ça marche pas quand on le met pas dans le test directemetn ?
 			//Ot[i][j] = _mm_sub_epi8(Ot[i][j], v_128);
 			//v_theta = _mm_sub_epi8(v_theta, v_128);
+>>>>>>> b3c31f27a835740687079bcec9fa320f9982a51d
 			a_0 = _mm_cmplt_epi8(_mm_sub_epi8(Ot[i][j], v_128), _mm_sub_epi8(v_theta, v_128));
+			// b_0 <- 255 si a_0 == 0
 			b_0 = _mm_andnot_si128(a_0, v_255);
+			// Et <- b_0
 			_mm_store_si128(&Et[i][j], b_0);
 
 			a_1 = _mm_cmplt_epi8(_mm_sub_epi8(Ot[i][j+1], v_128), _mm_sub_epi8(v_theta, v_128));
@@ -93,7 +102,13 @@ vuint8** SigmaDelta_step0_SSE2(vuint8** V, vuint8** M, vuint8** It,
 
 	for(i = 0; i < size_h; i++)	{
 		for(j = 0; j < size_l; j++)	{
+<<<<<<< HEAD
+			// V <- VMIN
+			_mm_store_si128(&V[i][j], v_vmin);	
+			// M <- It
+=======
 			_mm_store_si128(&V[i][j], v_vmin);
+>>>>>>> b3c31f27a835740687079bcec9fa320f9982a51d
 			_mm_store_si128(&M[i][j], It[i][j]);
 
 			_mm_store_si128(&V[i][j+1], v_vmin);
@@ -135,19 +150,34 @@ vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 	for (i = 0; i < size_h; i++)	{
 		for (j = 0; j < size_l; j++)	{
 			// Si M < I alors M<-M+1
+			// a <- 255 si M < It_1
+			//		0	sinon
 			a = _mm_cmplt_epi8(_mm_sub_epi8(M[i][j], v_128), _mm_sub_epi8(It_1[i][j], v_128));
+			// a <- 1 si a == 255
+			//		0 sinon
 			a = _mm_and_si128(a, v_0x01);
+			// a <- M+1 si a == 1
+			// 		M	sinon
 			a = _mm_add_epi8(M[i][j], a);
+			// M <- a
 			_mm_store_si128(&M[i][j], a);
 
 			b = _mm_cmplt_epi8(_mm_sub_epi8(M[i][j+1], v_128), _mm_sub_epi8(It_1[i][j+1], v_128));
 			b = _mm_and_si128(b, v_0x01);
 			b = _mm_add_epi8(M[i][j+1], b);
 			_mm_store_si128(&M[i][j+1], b);
+
 			// Si M > I alors M<-M-1
+			// a <- 255 si It_1 < M
+			//		0	sinon
 			a = _mm_cmplt_epi8(_mm_sub_epi8(It_1[i][j], v_128), _mm_sub_epi8(M[i][j], v_128));
+			// a <- 1 si a == 255
+			//		0 sinon
 			a = _mm_and_si128(a, v_0x01);
+			// a <- M-1 si a == 1
+			// 		M   sinon
 			a = _mm_sub_epi8(M[i][j], a);
+			// M <- a
 			_mm_store_si128(&M[i][j], a);
 
 			b = _mm_cmplt_epi8(_mm_sub_epi8(It_1[i][j+1], v_128), _mm_sub_epi8(M[i][j+1], v_128));
@@ -161,9 +191,11 @@ vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 	// Step#2: Difference Computation
 	for(i = 0; i < size_h; i++)	{
 		for(j = 0; j < size_l; j++)	{
+			// a <- abs(M, It_1)
 			a = _mm_min_epu8(M[i][j], It_1[i][j]);
 			b = _mm_max_epu8(It_1[i][j], M[i][j]);
 			a = _mm_sub_epi8(b, a);
+			// Ot <- a
 			_mm_store_si128(&Ot[i][j], a);
 
 			a = _mm_min_epu8(M[i][j+1], It_1[i][j+1]);
@@ -176,35 +208,74 @@ vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 	// Step#3: Vt update and clamping
 	for(i = 0; i < size_h; i++)	{
 		for(j = 0; j < size_l; j++)	{
-			// N x It_1
+			// a <- N x It_1
 			a = It_1[i][j];
 			for(k = 0; k < N; k++)	{
 				It_1[i][j] = _mm_add_epi8(It_1[i][j], a);
 			}
 			// Si V < NxIt_1
+			// a <- 255 si V < NxIt_1
+			//		0	sinon
 			a = _mm_cmplt_epi8(_mm_sub_epi8(V[i][j], v_128), _mm_sub_epi8(It_1[i][j], v_128));
+			// a <- 1	si a == 255
+			//		0	sinon
 			a = _mm_and_si128(a, v_0x01);
+			// a <- v+1	si a == 1
+			//		v 	sinon
 			a = _mm_add_epi8(V[i][j], a);
+<<<<<<< HEAD
+			// V <- a
+			_mm_store_si128(&V[i][j], a); 
+=======
 			_mm_store_si128(&V[i][j], a);
+>>>>>>> b3c31f27a835740687079bcec9fa320f9982a51d
 
 			b = _mm_cmplt_epi8(_mm_sub_epi8(V[i][j+1], v_128), _mm_sub_epi8(It_1[i][j+1], v_128));
 			b = _mm_and_si128(b, v_0x01);
 			b = _mm_add_epi8(V[i][j+1], b);
+<<<<<<< HEAD
+			_mm_store_si128(&V[i][j+1], b); 
+			
+=======
 			_mm_store_si128(&V[i][j+1], b);
+>>>>>>> b3c31f27a835740687079bcec9fa320f9982a51d
 			// Si V > NxIt_1
+			// a <- 255 si V > NxIt_1
+			//		0	sinon
 			a = _mm_cmplt_epi8(_mm_sub_epi8(It_1[i][j], v_128), _mm_sub_epi8(V[i][j], v_128));
+			// a <- 1 	si a == 255
+			//		0	sinon
 			a = _mm_and_si128(a, v_0x01);
+			// a <- V-1	si a == 1
+			//		V 	sinon	
 			a = _mm_sub_epi8(V[i][j], a);
+<<<<<<< HEAD
+			// V <- a
+			_mm_store_si128(&V[i][j], a); 
+=======
 			_mm_store_si128(&V[i][j], a);
+>>>>>>> b3c31f27a835740687079bcec9fa320f9982a51d
 
 			b = _mm_cmplt_epi8(_mm_sub_epi8(It_1[i][j+1], v_128), _mm_sub_epi8(V[i][j+1], v_128));
 			b = _mm_and_si128(b, v_0x01);
 			b = _mm_sub_epi8(V[i][j+1], b);
+<<<<<<< HEAD
+			_mm_store_si128(&V[i][j+1], b); 
+
+=======
 			_mm_store_si128(&V[i][j+1], b);
+>>>>>>> b3c31f27a835740687079bcec9fa320f9982a51d
 			// Clamp to [VMIN, VMAX]
+			// a <- min(V, VMAX)
 			a = _mm_min_epu8(V[i][j], v_vmax);
+			// a <- max(a, VMIN)
 			a = _mm_max_epu8(a, v_vmin);
+<<<<<<< HEAD
+			// V <- a
+			_mm_store_si128(&V[i][j], a); 
+=======
 			_mm_store_si128(&V[i][j], a);
+>>>>>>> b3c31f27a835740687079bcec9fa320f9982a51d
 
 			b = _mm_min_epu8(V[i][j+1], v_vmax);
 			b = _mm_max_epu8(b, v_vmin);
@@ -215,14 +286,21 @@ vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 	// Step#4: Et estimation
 	for(i = 0; i < size_h; i++)	{
 		for(j = 0; j < size_l; j++)	{
+<<<<<<< HEAD
+			// Si Ot < V 
+			// a <-	255	si Ot < V
+			//		0	sinon 
+=======
 			// Si Ot < V
+>>>>>>> b3c31f27a835740687079bcec9fa320f9982a51d
 			a = _mm_cmplt_epi8(_mm_sub_epi8(Ot[i][j], v_128), _mm_sub_epi8(V[i][j], v_128));
-			//a = _mm_and_si128(a, v_0x01);
+			// a <- 255	si a == 0
+			//		0	sinon
 			a = _mm_andnot_si128(a, v_255);
+			// Et <- a
 			_mm_store_si128(&Et[i][j], a);
 
 			b = _mm_cmplt_epi8(_mm_sub_epi8(Ot[i][j+1], v_128), _mm_sub_epi8(V[i][j+1], v_128));
-			//b = _mm_and_si128(b, v_0x01);
 			b = _mm_andnot_si128(b, v_255);
 			_mm_store_si128(&Et[i][j+1], b);
 		}
@@ -230,3 +308,7 @@ vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 
 	return Et;
 }
+<<<<<<< HEAD
+
+=======
+>>>>>>> b3c31f27a835740687079bcec9fa320f9982a51d
