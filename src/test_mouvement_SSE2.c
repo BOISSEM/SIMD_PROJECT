@@ -2,7 +2,7 @@
     test_mouvement_SSE2.c
 
     Fonctions de tests unitaires et d'intégration des fonctions de
-    detection de mouvement (non optimises) 
+    detection de mouvement (non optimises)
 
     Projet SIMD - Implementation d'une chaine de detection de mouvement
     temps-reel sur un processeur multi-coeurs SIMD
@@ -28,7 +28,7 @@
 /**
 *	Test fonctions Frame Difference SIMD
 **/
-void f_test_fd()
+void f_test_fd_SSE2()
 {
 	int i, j;
 	vuint8** img1_1;
@@ -41,7 +41,7 @@ void f_test_fd()
 	vuint8** img_etq1;
 	vuint8** img_etq2;
 
-	/*------ Allocation image test ------*/ 
+	/*------ Allocation image test ------*/
 	img1_1 = vui8matrix(0, SIZE_H, 0, SIZE_L);
 	img1_2 = vui8matrix(0, SIZE_H, 0, SIZE_L);
 	img2_1 = vui8matrix(0, SIZE_H, 0, SIZE_L);
@@ -87,7 +87,7 @@ void f_test_fd()
 	printf("\n=========== Routine Frame Difference ===========\n");
 	printf("\n");
 
-	img_etq1 = routine_FrameDifference(img1_2, img1_1, SIZE_H, SIZE_L, img_diff1, img_etq1);
+	img_etq1 = routine_FrameDifference_SSE2(img1_2, img1_1, SIZE_H, SIZE_L, img_diff1, img_etq1);
 
 	display_vui8matrix(img_etq1, 0, SIZE_H, 0, SIZE_L, " %3d ", "img_etq1");
 	printf("\n =====!!!! PROBLEME AVEC LES PIXELS PLUS GRAND QUE 127 !!!!=====\n");
@@ -100,9 +100,9 @@ void f_test_fd()
 	img2_1[4][0] = init_vuint8_all(0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 230, 230);
 	img2_1[5][0] = init_vuint8_all(0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 15, 25);
 
-	img2_2[2][1] = init_vuint8_all(0, 3, 0, 0, 0, 1, 125, 200, 255, 0, 0, 0, 0, 0, 15, 25);	
-	img2_2[3][1] = init_vuint8_all(0, 3, 0, 20, 0, 49, 125, 20, 255, 0, 0, 1, 0, 0, 0, 0);	
-	img2_2[4][0] = init_vuint8_all(0, 3, 0, 0, 0, 1, 0, 30, 55, 0, 2, 0, 0, 0, 1, 2);	
+	img2_2[2][1] = init_vuint8_all(0, 3, 0, 0, 0, 1, 125, 200, 255, 0, 0, 0, 0, 0, 15, 25);
+	img2_2[3][1] = init_vuint8_all(0, 3, 0, 20, 0, 49, 125, 20, 255, 0, 0, 1, 0, 0, 0, 0);
+	img2_2[4][0] = init_vuint8_all(0, 3, 0, 0, 0, 1, 0, 30, 55, 0, 2, 0, 0, 0, 1, 2);
 	img2_2[5][1] = init_vuint8_all(0, 3, 0, 0, 0, 1, 0, 30, 55, 0, 0, 0, 0, 0, 120, 123);
 
 	display_vui8matrix(img2_1, 0, SIZE_H, 0, SIZE_L, " %3d ", "img2_1");
@@ -112,11 +112,11 @@ void f_test_fd()
 	printf("\n=========== Routine Frame Difference ===========\n");
 	printf("\n");
 
-	img_etq2 = routine_FrameDifference(img2_2, img2_1, SIZE_H, SIZE_L, img_diff2, img_etq2);
+	img_etq2 = routine_FrameDifference_SSE2(img2_2, img2_1, SIZE_H, SIZE_L, img_diff2, img_etq2);
 
 	display_vui8matrix(img_etq2, 0, SIZE_H, 0, SIZE_L, " %3d ", "img_etq2");
 	printf("\n =====!!!! PROBLEME AVEC LES PIXELS PLUS GRAND QUE 127 !!!!=====\n");
-	printf("\n");	
+	printf("\n");
 
 	//============ DESALLOCATION MEMOIRE =============
 	free_vui8matrix(img1_1, 0, SIZE_H, 0, SIZE_L);
@@ -134,7 +134,7 @@ void f_test_fd()
 /**
 *	Test fonctions Sigma Delta SIMD
 **/
-void f_test_sd()
+void f_test_sd_SSE2()
 {
 	int i, j;
 	vuint8** img1_0;
@@ -165,7 +165,7 @@ void f_test_sd()
 	vuint8** img_etq1_3;
 	vuint8** img_etq1_4;
 
-	/*------ Allocation image test ------*/ 
+	/*------ Allocation image test ------*/
 	img1_0 = vui8matrix(0, SIZE_H, 0, SIZE_L);
 	img1_1 = vui8matrix(0, SIZE_H, 0, SIZE_L);
 	img1_2 = vui8matrix(0, SIZE_H, 0, SIZE_L);
@@ -226,8 +226,8 @@ void f_test_sd()
             img_etq1_1[i][j] = v_0;	img_etq1_1[i][j+1] = v_0;
             img_etq1_2[i][j] = v_0;	img_etq1_2[i][j+1] = v_0;
             img_etq1_3[i][j] = v_0;	img_etq1_3[i][j+1] = v_0;
-            img_etq1_4[i][j] = v_0;	img_etq1_4[i][j+1] = v_0; 
-		}		
+            img_etq1_4[i][j] = v_0;	img_etq1_4[i][j+1] = v_0;
+		}
 	}
 
 	/*------ Test fonctions ------*/
@@ -238,14 +238,14 @@ void f_test_sd()
 	img1_1[4][0] = init_vuint8_all(0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 230, 230);
 	img1_1[5][0] = init_vuint8_all(0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 15, 25);
 
-	img1_2[2][1] = init_vuint8_all(0, 3, 0, 0, 0, 1, 125, 200, 255, 0, 0, 0, 0, 0, 15, 25);	
-	img1_2[3][1] = init_vuint8_all(0, 3, 0, 20, 0, 49, 125, 20, 255, 0, 0, 1, 0, 0, 0, 0);	
-	img1_2[4][0] = init_vuint8_all(0, 3, 0, 0, 0, 1, 0, 30, 55, 0, 2, 0, 0, 0, 1, 2);	
+	img1_2[2][1] = init_vuint8_all(0, 3, 0, 0, 0, 1, 125, 200, 255, 0, 0, 0, 0, 0, 15, 25);
+	img1_2[3][1] = init_vuint8_all(0, 3, 0, 20, 0, 49, 125, 20, 255, 0, 0, 1, 0, 0, 0, 0);
+	img1_2[4][0] = init_vuint8_all(0, 3, 0, 0, 0, 1, 0, 30, 55, 0, 2, 0, 0, 0, 1, 2);
 	img1_2[5][1] = init_vuint8_all(0, 3, 0, 0, 0, 1, 0, 30, 55, 0, 0, 0, 0, 0, 120, 123);
 
 	printf("\n======================\n");
 
-	img_moy1_0 = SigmaDelta_step0(img_var1_0, img_moy1_0, img1_0, SIZE_H, SIZE_L);
+	img_moy1_0 = SigmaDelta_step0_SSE2(img_var1_0, img_moy1_0, img1_0, SIZE_H, SIZE_L);
 
 	display_vui8matrix(img1_0, 0, SIZE_H, 0, SIZE_L, " %3d ", "img1_0");
 	printf("\n");
@@ -261,7 +261,7 @@ void f_test_sd()
 
 	printf("\n======================\n");
 
-	img_etq1_1 = SigmaDelta_1step(img1_1, img_dif1_1, SIZE_H, SIZE_L, img_moy1_0, img_var1_0, img_etq1_1);
+	img_etq1_1 = SigmaDelta_1step_SSE2(img1_1, img_dif1_1, SIZE_H, SIZE_L, img_moy1_0, img_var1_0, img_etq1_1);
 
 	display_vui8matrix(img_moy1_0, 0, SIZE_H, 0, SIZE_L, " %3d ", "img_moy1_0");
 	printf("\n");
@@ -306,22 +306,8 @@ void f_test_sd()
 }
 
 
-void f_test_mouvement()	{
+void f_test_mouvement_SSE2()	{
 
-	//f_test_fd();
-	f_test_sd();
+	//f_test_fd_SSE2();
+	f_test_sd_SSE2();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

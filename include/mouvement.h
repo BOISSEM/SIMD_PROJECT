@@ -4,14 +4,14 @@
 	Le 20 Octobre 2018
 
 	Projet SIMD
-	Prototype des algorithmes SIMD
+	Prototype des algorithmes scalaires
 	de detection de mouvement (non optimisés)
 ----------------------------------------------- */
 #ifndef __MOUVEMENT_H__
 #define __MOUVEMENT_H__
 
 #define NB_IMAGE 200
-#define THETA 10
+#define THETA 50
 #define N 3
 #define VMAX 40
 #define VMIN 20
@@ -27,8 +27,8 @@
  *	@param Et	Tableau d'etiquettes binaires de sortie
  *	@return				pointeur vers le tableau d'etiquettes binaires
  */
-vuint8** routine_FrameDifference_SSE2(vuint8** It, vuint8** It_1,
-	int size_h, int size_l, vuint8** Ot, vuint8** Et);
+uint8_t** routine_FrameDifference(uint8_t** It, uint8_t** It_1,
+	int size_h, int size_l, uint8_t** Ot, uint8_t** Et);
 
 /**
  *	Etape prologue de l'algorithme Sigma Delta
@@ -40,7 +40,7 @@ vuint8** routine_FrameDifference_SSE2(vuint8** It, vuint8** It_1,
  *	@param size_h		Hauteur de l'iamge
  * 	@return				Pointeur vers le tableau de Ms
  */
-vuint8** SigmaDelta_step0_SSE2(vuint8** V, vuint8** M, vuint8** It,
+uint8_t** SigmaDelta_step0(uint8_t** V, uint8_t** M, uint8_t** It,
 	int size_h, int size_l);
 
 /**
@@ -55,7 +55,10 @@ vuint8** SigmaDelta_step0_SSE2(vuint8** V, vuint8** M, vuint8** It,
  *	@param Et	Etiquette binaire de sortie
  *	@return 			Pointeur vers tableau d'etiquettes binaires
  */
-vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
-	int size_h, int size_l, vuint8** M, vuint8** V, vuint8** Et);
+uint8_t** SigmaDelta_1step(uint8_t** It_1, uint8_t** Ot,
+	int size_h, int size_l, uint8_t** M, uint8_t** V, uint8_t** Et);
+
+int min(int a, int b);
+int max(int a, int b);
 
 #endif //__MOUVEMENT_H__
