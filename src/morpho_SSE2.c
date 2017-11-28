@@ -26,18 +26,18 @@
  *  @param  size_l  Largeur de l'image
  *  @param  dest    Image dilatee
  */
-void dilate_bin3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest){
+void dilate_bin3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest)
+{
     int i, j, di, dj;
     vuint8 x1, x2, x3;
     vuint8 dilat;
 
     // Parcours image
-    for(i = 0; i < size_h; i++)
+    for(i = 0; i <= (size_h-1); i++)
     {
-        for(j = 0; j < size_l; j++)
+        for(j = 0; j <= (size_l-1); j++)
         {
-            x1 = vec_left1(src[i][j], src[i][j+1]);
-
+            
         }
     }
 }
