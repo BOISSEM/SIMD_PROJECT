@@ -5,7 +5,7 @@
 # Copyright (c) 2000-2007 Lionel Lacassagne
 
 # -- Lile list ----------
-FILE = main.c nrutil.c vnrutil.c mouvement.c test_mouvement.c morpho.c test_morpho.c morpho_SSE2.c mouvement_SSE2.c test_mouvement_SSE2.c test_car3.c
+FILE = main.c nrutil.c vnrutil.c mouvement.c test_mouvement.c mouvement_SSE2.c test_mouvement_SSE2.c morpho.c test_morpho.c morpho_SSE2.c test_morpho_SSE2.c test_car3.c
 
 # -- Paths ----------
 SRC_PATH = src
