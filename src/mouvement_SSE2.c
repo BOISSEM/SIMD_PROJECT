@@ -59,9 +59,9 @@ vuint8** routine_FrameDifference_SSE2(vuint8** It, vuint8** It_1,
  			_mm_store_si128(&Ot[i][j+1], a_1);
 
 			// Step#2: thresholding and Et estimation
-			//Pourquoi ça marche pas quand on le met pas dans le test directemetn ? 
+			//Pourquoi ça marche pas quand on le met pas dans le test directemetn ?
 			// a_0 <- 255 si Ot < THETA
-			//		  0	sinon 
+			//		  0	sinon
 			a_0 = _mm_cmplt_epi8(_mm_sub_epi8(Ot[i][j], v_128), _mm_sub_epi8(v_theta, v_128));
 			// b_0 <- 255 si a_0 == 0
 			b_0 = _mm_andnot_si128(a_0, v_255);
@@ -97,7 +97,7 @@ vuint8** SigmaDelta_step0_SSE2(vuint8** V, vuint8** M, vuint8** It,
 	for(i = 0; i < size_h; i++)	{
 		for(j = 0; j < size_l; j++)	{
 			// V <- VMIN
-			_mm_store_si128(&V[i][j], v_vmin);	
+			_mm_store_si128(&V[i][j], v_vmin);
 			// M <- It
 			_mm_store_si128(&M[i][j], It[i][j]);
 
@@ -214,12 +214,12 @@ vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 			//		v 	sinon
 			a = _mm_add_epi8(V[i][j], a);
 			// V <- a
-			_mm_store_si128(&V[i][j], a); 
+			_mm_store_si128(&V[i][j], a);
 
 			b = _mm_cmplt_epi8(_mm_sub_epi8(V[i][j+1], v_128), _mm_sub_epi8(It_1[i][j+1], v_128));
 			b = _mm_and_si128(b, v_0x01);
 			b = _mm_add_epi8(V[i][j+1], b);
-			_mm_store_si128(&V[i][j+1], b); 
+			_mm_store_si128(&V[i][j+1], b);
 
 			// Si V > NxIt_1
 			// a <- 255 si V > NxIt_1
@@ -229,15 +229,15 @@ vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 			//		0	sinon
 			a = _mm_and_si128(a, v_0x01);
 			// a <- V-1	si a == 1
-			//		V 	sinon	
+			//		V 	sinon
 			a = _mm_sub_epi8(V[i][j], a);
 			// V <- a
-			_mm_store_si128(&V[i][j], a); 
+			_mm_store_si128(&V[i][j], a);
 
 			b = _mm_cmplt_epi8(_mm_sub_epi8(It_1[i][j+1], v_128), _mm_sub_epi8(V[i][j+1], v_128));
 			b = _mm_and_si128(b, v_0x01);
 			b = _mm_sub_epi8(V[i][j+1], b);
-			_mm_store_si128(&V[i][j+1], b); 
+			_mm_store_si128(&V[i][j+1], b);
 
 			// Clamp to [VMIN, VMAX]
 			// a <- min(V, VMAX)
@@ -245,7 +245,7 @@ vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 			// a <- max(a, VMIN)
 			a = _mm_max_epu8(a, v_vmin);
 			// V <- a
-			_mm_store_si128(&V[i][j], a); 
+			_mm_store_si128(&V[i][j], a);
 
 			b = _mm_min_epu8(V[i][j+1], v_vmax);
 			b = _mm_max_epu8(b, v_vmin);
@@ -256,9 +256,9 @@ vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 	// Step#4: Et estimation
 	for(i = 0; i < size_h; i++)	{
 		for(j = 0; j < size_l; j++)	{
-			// Si Ot < V 
+			// Si Ot < V
 			// a <-	255	si Ot < V
-			//		0	sinon 
+			//		0	sinon
 			a = _mm_cmplt_epi8(_mm_sub_epi8(Ot[i][j], v_128), _mm_sub_epi8(V[i][j], v_128));
 			// a <- 255	si a == 0
 			//		0	sinon

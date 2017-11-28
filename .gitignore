@@ -1,5 +1,5 @@
 
 *.o
 *.o
-exe/detect
-src/mouvement_SSE2.c
+exe/
+obj/
