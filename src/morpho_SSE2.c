@@ -22,14 +22,14 @@
 #include "morpho_SSE2.h"
 
 /**
- *  (SIMD) Dilataion binaire d'une image avec un élément structurant de taille 3x3
+ *  (SIMD) Dilataion d'une image avec un élément structurant de taille 3x3
  *
  *  @param  src     Image source
  *  @param  size_h  Hauteur de l'image
  *  @param  size_l  Largeur de l'image
  *  @param  dest    Image dilatee
  */
-void dilate_bin3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest)
+void dilate3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest)
 {
     int i, j;
     vuint8 x_1, x0, x1;
@@ -80,14 +80,14 @@ void dilate_bin3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest)
 }
 
 /**
- *  (SIMD) Erosion binaire d'une image avec un élément structurant de taille 3x3
+ *  (SIMD) Erosion d'une image avec un élément structurant de taille 3x3
  *
  *  @param  src     Image source
  *  @param  size_h  Hauteur de l'image
  *  @param  size_l  Largeur de l'image
  *  @param  dest    Image erodee
  */
-void erode_bin3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest)
+void erode3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest)
 {
     int i, j;
     vuint8 x_1, x0, x1;

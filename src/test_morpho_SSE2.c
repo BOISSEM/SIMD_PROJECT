@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <x86intrin.h>
 
 #include "debug_macro.h"
 
@@ -21,8 +22,8 @@
 
 #include "simd_macro.h"
 #include "morpho_SSE2.h"
+#include "morpho_SSE2_opt.h"
 #include "test_morpho_SSE2.h"
-
 
 void f_test_macro(void)
 {
@@ -73,14 +74,15 @@ void f_test_dilate_bin3_SSE2()
     vuint8 **img1, **img2;
 
     card = card_vuint8();
-    int l = card*1;
+    int l = card * 3;
     int h = 4;
-    int bord = 1;
+    int bord_i = 1;
+    int bord_j = 0;
 
-    si0 = 0;        si0b = si0 - bord;
-    si1 = h-1;      si1b = si1 + bord;
-    sj0 = 0;        sj0b = sj0 - bord;
-    sj1 = l-1;      sj1b = sj1 + bord;
+    si0 = 0;        si0b = si0 - bord_i;
+    si1 = h-1;      si1b = si1 + bord_i;
+    sj0 = 0;        sj0b = sj0 - bord_j;
+    sj1 = l-1;      sj1b = sj1 + bord_j;
 
     s2v(si0, si1, sj0, sj1, card, &vi0, &vi1, &vj0, &vj1);
     s2v(si0b, si1b, sj0b, sj1b, card, &vi0b, &vi1b, &vj0b, &vj1b);
@@ -96,14 +98,14 @@ void f_test_dilate_bin3_SSE2()
 
     zero_vsi8matrix(img1, vi0, vi1, vj0b, vj1b);
     zero_vsi8matrix(img2, vi0b, vi1b, vj0b, vj1b);
-    init_vui8matrix_param(img1, vi0, vi1, vj0, vj1, 1, 1, 1);
+    init_vui8matrix_param(img1, vi0, vi1, vj0, vj1, 1, 1, 2);
 
     display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 = ");
     display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = ");
 
-    dilate_bin3_SSE2(img1, vi1+1, vj1+1, img2);
-
-    display_vui8matrix(img2, vi0, vi1, vj0, vj1, " %3d ", "img2 = ");
+    printf("Dilate SSE2 optimisé : ");
+    dilate3_SSE2_opt(img1, vi1+1, vj1+1, img2);
+    display_vui8matrix(img2, vi0, vi1, vj0, vj1, "%3d", "img2 = ");
 
 }
 
