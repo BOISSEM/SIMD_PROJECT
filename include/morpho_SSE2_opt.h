@@ -21,4 +21,24 @@
  */
 void dilate3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest);
 
+/**
+ *  (SIMD) Erosion en niveau de gris d'une image avec un élément structurant de taille 3x3
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image erodee
+ */
+void erode3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest);
+
+/**
+ *  (SIMD) Ouverture en niveau de gris d'une image avec un élément structurant de taille 3x3
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image dilatee
+ */
+void open3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer);
+
 #endif  // __MORPHO_SSE2_OPT_H__

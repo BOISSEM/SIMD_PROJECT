@@ -4,6 +4,7 @@
 #include "test_mouvement.h"
 #include "test_mouvement_SSE2.h"
 #include "test_morpho.h"
+#include "test_morpho_SSE2.h"
 #include "test_car3.h"
 
 int main()
