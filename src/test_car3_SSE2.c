@@ -22,9 +22,6 @@
 #define BORD_TAB    16
 
 char buffer[200];
-// Matrice Roc 
-long int ROC[2][2];
-
 
 void f_test_fd_car3_SSE2()	{
 
@@ -203,8 +200,8 @@ void f_test_sd_morpho_car3_SSE2()	{
 
 
 void f_test_mouvement_car3_SSE2()	{
-	//f_test_fd_car3_SSE2();
-	f_test_sd_car3_SSE2();
+	f_test_fd_car3_SSE2();
+	//f_test_sd_car3_SSE2();
 	//f_test_fd_morpho_car3_SSE2();
 	//f_test_sd_morpho_car3_SSE2();
 }
