@@ -65,7 +65,7 @@ void f_test_macro(void)
 
 void f_test_dilate3_SSE2()
 {
-    int i, j;
+    int i0, i1;
     int card; // cardinal of vector type
     int si0, si1, sj0, sj1;
     int si0b, si1b, sj0b, sj1b;
@@ -75,8 +75,8 @@ void f_test_dilate3_SSE2()
     vuint8 **img1, **img2;
 
     card = card_vuint8();
-    int l = card * 3;
-    int h = 4;
+    int l = card * 2;
+    int h = 5;
     int bord_i = 1;
     int bord_j = 0;
 
@@ -92,33 +92,35 @@ void f_test_dilate3_SSE2()
     img1 = vui8matrix(vi0b, vi1b, vj0b, vj1b);
     img2 = vui8matrix(vi0b, vi1b, vj0b, vj1b);
 
-    j = vi1b;
-    for(i = vi0b; i<vi0; i++){
-        img1[i] = img1[vi0];
-        img2[i] = img2[vi0];
-        img1[j] = img1[vi1];
-        img2[j] = img2[vi1];
-        j--;
+    /* Bords haut et bas */
+    i1 = vi1b;
+    for(i0 = vi0b; i0<vi0; i0++){
+        img1[i0] = img1[vi0];
+        img2[i0] = img2[vi0];
+        img1[i1] = img1[vi1];
+        img2[i1] = img2[vi1];
+        i1--;
     }
 
-    zero_vsi8matrix(img1, vi0, vi1, vj0b, vj1b);
-    zero_vsi8matrix(img2, vi0b, vi1b, vj0b, vj1b);
+    zero_vui8matrix(img1, vi0, vi1, vj0b, vj1b);
+    zero_vui8matrix(img2, vi0b, vi1b, vj0b, vj1b);
     init_vui8matrix_param(img1, vi0, vi1, vj0, vj1, 1, 1, 2);
 
-    display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 = ");
-    display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = ");
+    DEBUG(display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 (+bords) = "));
+    DEBUG(display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = "));
 
 
-    // printf("Dilate SSE2 : \n"); dilate3_SSE2(img1, vi1+1, vj1+1, img2);
-    printf("Dilate SSE2 optimisé : \n"); dilate3_SSE2_opt(img1, vi1+1, vj1+1, img2);
+    printf("Dilate SSE2 : \n"); dilate3_SSE2(img1, vi1+1, vj1+1, img2);
+    // printf("Dilate SSE2 optimisé : \n"); dilate3_SSE2_opt(img1, vi1+1, vj1+1, img2);
 
-    display_vui8matrix(img2, vi0, vi1, vj0, vj1, "%3d", "img2 = ");
+    DEBUG(display_vui8matrix(img2, vi0, vi1, vj0, vj1, "%3d", "img2 = "));
+
 
 }
 
 void f_test_erode3_SSE2()
 {
-    int i, j;
+    int i0, i1;
     int card; // cardinal of vector type
     int si0, si1, sj0, sj1;
     int si0b, si1b, sj0b, sj1b;
@@ -145,31 +147,32 @@ void f_test_erode3_SSE2()
     img1 = vui8matrix(vi0b, vi1b, vj0b, vj1b);
     img2 = vui8matrix(vi0b, vi1b, vj0b, vj1b);
 
-    j = vi1b;
-    for(i = vi0b; i<vi0; i++){
-        img1[i] = img1[vi0];
-        img2[i] = img2[vi0];
-        img1[j] = img1[vi1];
-        img2[j] = img2[vi1];
-        j--;
+    /* Bords haut et bas */
+    i1 = vi1b;
+    for(i0 = vi0b; i0<vi0; i0++){
+        img1[i0] = img1[vi0];
+        img2[i0] = img2[vi0];
+        img1[i1] = img1[vi1];
+        img2[i1] = img2[vi1];
+        i1--;
     }
 
-    zero_vsi8matrix(img1, vi0, vi1, vj0b, vj1b);
-    zero_vsi8matrix(img2, vi0b, vi1b, vj0b, vj1b);
+    zero_vui8matrix(img1, vi0, vi1, vj0b, vj1b);
+    zero_vui8matrix(img2, vi0b, vi1b, vj0b, vj1b);
     init_vui8matrix_param(img1, vi0, vi1, vj0, vj1, 1, 1, 2);
 
-    display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 = ");
-    display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = ");
+    DEBUG(display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 (+bords) = "));
+    DEBUG(display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = "));
 
-    // printf("Erode SSE2 : \n"); erode3_SSE2(img1, vi1+1, vj1+1, img2);
-    printf("Erode SSE2 optimisé : \n"); erode3_SSE2_opt(img1, vi1+1, vj1+1, img2);
+    printf("Erode SSE2 : \n"); erode3_SSE2(img1, vi1+1, vj1+1, img2);
+    // printf("Erode SSE2 optimisé : \n"); erode3_SSE2_opt(img1, vi1+1, vj1+1, img2);
 
     display_vui8matrix(img2, vi0, vi1, vj0, vj1, "%3d", "img2 = ");
 }
 
 void f_test_open3_SSE2()
 {
-    int i, j;
+    int i0, i1;
     int card; // cardinal of vector type
     int si0, si1, sj0, sj1;
     int si0b, si1b, sj0b, sj1b;
@@ -197,33 +200,38 @@ void f_test_open3_SSE2()
     img2 = vui8matrix(vi0b, vi1b, vj0b, vj1b);
     buffer = vui8matrix(vi0b, vi1b, vj0b, vj1b);
 
-    j = vi1b;
-    for(i = vi0b; i<vi0; i++){
-        img1[i] = img1[vi0];
-        img2[i] = img2[vi0];
-        img1[j] = img1[vi1];
-        img2[j] = img2[vi1];
-        j--;
+
+    /* Bords haut (i0) et bas (i1) */
+    i1 = vi1b;
+    for(i0 = vi0b; i0<vi0; i0++){
+        img1[i0] = img1[vi0];
+        img2[i0] = img2[vi0];
+        img1[i1] = img1[vi1];
+        img2[i1] = img2[vi1];
+        buffer[i0] = buffer[vi0];
+        buffer[i1] = buffer[vj0];
+        i1--;
     }
 
-    zero_vsi8matrix(img1, vi0, vi1, vj0b, vj1b);
-    zero_vsi8matrix(img2, vi0b, vi1b, vj0b, vj1b);
+    zero_vui8matrix(img1, vi0, vi1, vj0b, vj1b);
+    zero_vui8matrix(img2, vi0b, vi1b, vj0b, vj1b);
     init_vui8matrix_param(img1, vi0, (vi1/2), vj0, vj1, 1, 1, 2);
     init_vui8matrix_param(img1, (vi1/2)+1, vi1, vj0, vj1, 0, 2, 1);
 
-    display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 = ");
-    display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = ");
+    DEBUG(display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 (+bords) = "));
+    DEBUG(display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = "));
 
-    // printf("Open SSE2 : \n"); open3_SSE2(img1, vi1+1, vj1+1, img2, buffer);
-    printf("Open SSE2 optimisé : \n"); open3_SSE2_opt(img1, vi1+1, vj1+1, img2, buffer);
+    printf("Open SSE2 : \n"); open3_SSE2(img1, vi1+1, vj1+1, img2, buffer);
+    // printf("Open SSE2 optimisé : \n"); open3_SSE2_opt(img1, vi1+1, vj1+1, img2, buffer);
+    // printf("Open SSE2 test : \n"); open3_SSE2_test(img1, vi1+1, vj1+1, img2, buffer);
 
-    display_vui8matrix(buffer, vi0, vi1, vj0, vj1, "%3d", "buffer = ");
-    display_vui8matrix(img2, vi0, vi1, vj0, vj1, "%3d", "img2 = ");
+    DEBUG(display_vui8matrix(buffer, vi0, vi1, vj0, vj1, "%3d", "buffer = "));
+    DEBUG(display_vui8matrix(img2, vi0, vi1, vj0, vj1, "%3d", "img2 = "));
 }
 
 void f_test_close3_SSE2()
 {
-    int i, j;
+    int i0, i1;
     int card; // cardinal of vector type
     int si0, si1, sj0, sj1;
     int si0b, si1b, sj0b, sj1b;
@@ -251,22 +259,25 @@ void f_test_close3_SSE2()
     img2 = vui8matrix(vi0b, vi1b, vj0b, vj1b);
     buffer = vui8matrix(vi0b, vi1b, vj0b, vj1b);
 
-    j = vi1b;
-    for(i = vi0b; i<vi0; i++){
-        img1[i] = img1[vi0];
-        img2[i] = img2[vi0];
-        img1[j] = img1[vi1];
-        img2[j] = img2[vi1];
-        j--;
+    /* Bords haut et bas */
+    i1 = vi1b;
+    for(i0 = vi0b; i0<vi0; i0++){
+        img1[i0] = img1[vi0];
+        img2[i0] = img2[vi0];
+        img1[i1] = img1[vi1];
+        img2[i1] = img2[vi1];
+        buffer[i0] = buffer[vi0];
+        buffer[i1] = buffer[vj0];
+        i1--;
     }
 
-    zero_vsi8matrix(img1, vi0, vi1, vj0b, vj1b);
-    zero_vsi8matrix(img2, vi0b, vi1b, vj0b, vj1b);
+    zero_vui8matrix(img1, vi0, vi1, vj0b, vj1b);
+    zero_vui8matrix(img2, vi0b, vi1b, vj0b, vj1b);
     init_vui8matrix_param(img1, vi0, (vi1/2), vj0, vj1, 1, 1, 2);
     init_vui8matrix_param(img1, (vi1/2)+1, vi1, vj0, vj1, 0, 2, 1);
 
-    display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 = ");
-    display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = ");
+    DEBUG(display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 (+bords) = "));
+    DEBUG(display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = "));
 
     printf("Close SSE2 : \n"); close3_SSE2(img1, vi1+1, vj1+1, img2, buffer);
     // printf("Close SSE2 optimisé : \n"); close3_SSE2_opt(img1, vi1+1, vj1+1, img2, buffer);
@@ -277,7 +288,7 @@ void f_test_close3_SSE2()
 
 void f_test_dilate5_SSE2()
 {
-    int i, j;
+    int i0, i1;
     int card; // cardinal of vector type
     int si0, si1, sj0, sj1;
     int si0b, si1b, sj0b, sj1b;
@@ -304,21 +315,22 @@ void f_test_dilate5_SSE2()
     img1 = vui8matrix(vi0b, vi1b, vj0b, vj1b);
     img2 = vui8matrix(vi0b, vi1b, vj0b, vj1b);
 
-    j = vi1b;
-    for(i = vi0b; i<vi0; i++){
-        img1[i] = img1[vi0];
-        img2[i] = img2[vi0];
-        img1[j] = img1[vi1];
-        img2[j] = img2[vi1];
-        j--;
+    /* Bords haut et bas */
+    i1 = vi1b;
+    for(i0 = vi0b; i0<vi0; i0++){
+        img1[i0] = img1[vi0];
+        img2[i0] = img2[vi0];
+        img1[i1] = img1[vi1];
+        img2[i1] = img2[vi1];
+        i1--;
     }
 
-    zero_vsi8matrix(img1, vi0, vi1, vj0b, vj1b);
-    zero_vsi8matrix(img2, vi0b, vi1b, vj0b, vj1b);
+    zero_vui8matrix(img1, vi0, vi1, vj0b, vj1b);
+    zero_vui8matrix(img2, vi0b, vi1b, vj0b, vj1b);
     init_vui8matrix_param(img1, vi0, vi1, vj0, vj1, 1, 1, 2);
 
-    display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 = ");
-    display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = ");
+    DEBUG(display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 (+bords) = "));
+    DEBUG(display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = "));
 
 
     printf("Dilate5 SSE2 : \n"); dilate5_SSE2(img1, vi1+1, vj1+1, img2);
@@ -329,7 +341,7 @@ void f_test_dilate5_SSE2()
 
 void f_test_erode5_SSE2()
 {
-    int i, j;
+    int i0, i1;
     int card; // cardinal of vector type
     int si0, si1, sj0, sj1;
     int si0b, si1b, sj0b, sj1b;
@@ -356,21 +368,22 @@ void f_test_erode5_SSE2()
     img1 = vui8matrix(vi0b, vi1b, vj0b, vj1b);
     img2 = vui8matrix(vi0b, vi1b, vj0b, vj1b);
 
-    j = vi1b;
-    for(i = vi0b; i<vi0; i++){
-        img1[i] = img1[vi0];
-        img2[i] = img2[vi0];
-        img1[j] = img1[vi1];
-        img2[j] = img2[vi1];
-        j--;
+    /* Bords haut et bas */
+    i1 = vi1b;
+    for(i0 = vi0b; i0<vi0; i0++){
+        img1[i0] = img1[vi0];
+        img2[i0] = img2[vi0];
+        img1[i1] = img1[vi1];
+        img2[i1] = img2[vi1];
+        i1--;
     }
 
-    zero_vsi8matrix(img1, vi0, vi1, vj0b, vj1b);
-    zero_vsi8matrix(img2, vi0b, vi1b, vj0b, vj1b);
+    zero_vui8matrix(img1, vi0, vi1, vj0b, vj1b);
+    zero_vui8matrix(img2, vi0b, vi1b, vj0b, vj1b);
     init_vui8matrix_param(img1, vi0, vi1, vj0, vj1, 1, 1, 2);
 
-    display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 = ");
-    display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = ");
+    DEBUG(display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 (+bords) = "));
+    DEBUG(display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = "));
 
 
     printf("Erode5 SSE2 : \n"); erode5_SSE2(img1, vi1+1, vj1+1, img2);
@@ -381,7 +394,7 @@ void f_test_erode5_SSE2()
 
 void f_test_open5_SSE2()
 {
-    int i, j;
+    int i0, i1;
     int card; // cardinal of vector type
     int si0, si1, sj0, sj1;
     int si0b, si1b, sj0b, sj1b;
@@ -409,22 +422,25 @@ void f_test_open5_SSE2()
     img2 = vui8matrix(vi0b, vi1b, vj0b, vj1b);
     buffer = vui8matrix(vi0b, vi1b, vj0b, vj1b);
 
-    j = vi1b;
-    for(i = vi0b; i<vi0; i++){
-        img1[i] = img1[vi0];
-        img2[i] = img2[vi0];
-        img1[j] = img1[vi1];
-        img2[j] = img2[vi1];
-        j--;
+    /* Bords haut et bas */
+    i1 = vi1b;
+    for(i0 = vi0b; i0<vi0; i0++){
+        img1[i0] = img1[vi0];
+        img2[i0] = img2[vi0];
+        img1[i1] = img1[vi1];
+        img2[i1] = img2[vi1];
+        buffer[i0] = buffer[vi0];
+        buffer[i1] = buffer[vj0];
+        i1--;
     }
 
-    zero_vsi8matrix(img1, vi0, vi1, vj0b, vj1b);
-    zero_vsi8matrix(img2, vi0b, vi1b, vj0b, vj1b);
+    zero_vui8matrix(img1, vi0, vi1, vj0b, vj1b);
+    zero_vui8matrix(img2, vi0b, vi1b, vj0b, vj1b);
     init_vui8matrix_param(img1, vi0, (vi1/2), vj0, vj1, 1, 1, 2);
     init_vui8matrix_param(img1, (vi1/2)+1, vi1, vj0, vj1, 0, 2, 1);
 
-    display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 = ");
-    display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = ");
+    DEBUG(display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 (+bords) = "));
+    DEBUG(display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = "));
 
     printf("Open5 SSE2 : \n"); open5_SSE2(img1, vi1+1, vj1+1, img2, buffer);
     // printf("Open5 SSE2 optimisé : \n"); open5_SSE2_opt(img1, vi1+1, vj1+1, img2, buffer);
@@ -434,7 +450,7 @@ void f_test_open5_SSE2()
 
 void f_test_close5_SSE2()
 {
-    int i, j;
+    int i0, i1;
     int card; // cardinal of vector type
     int si0, si1, sj0, sj1;
     int si0b, si1b, sj0b, sj1b;
@@ -462,24 +478,27 @@ void f_test_close5_SSE2()
     img2 = vui8matrix(vi0b, vi1b, vj0b, vj1b);
     buffer = vui8matrix(vi0b, vi1b, vj0b, vj1b);
 
-    j = vi1b;
-    for(i = vi0b; i<vi0; i++){
-        img1[i] = img1[vi0];
-        img2[i] = img2[vi0];
-        img1[j] = img1[vi1];
-        img2[j] = img2[vi1];
-        j--;
+    /* Bords haut et bas */
+    i1 = vi1b;
+    for(i0 = vi0b; i0<vi0; i0++){
+        img1[i0] = img1[vi0];
+        img2[i0] = img2[vi0];
+        img1[i1] = img1[vi1];
+        img2[i1] = img2[vi1];
+        buffer[i0] = buffer[vi0];
+        buffer[i1] = buffer[vj0];
+        i1--;
     }
 
-    zero_vsi8matrix(img1, vi0, vi1, vj0b, vj1b);
-    zero_vsi8matrix(img2, vi0b, vi1b, vj0b, vj1b);
+    zero_vui8matrix(img1, vi0, vi1, vj0b, vj1b);
+    zero_vui8matrix(img2, vi0b, vi1b, vj0b, vj1b);
     init_vui8matrix_param(img1, vi0, (vi1/2), vj0, vj1, 1, 1, 2);
     init_vui8matrix_param(img1, (vi1/2)+1, vi1, vj0, vj1, 0, 2, 1);
 
-    display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 = ");
-    display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = ");
+    DEBUG(display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 (+bords) = "));
+    DEBUG(display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = "));
 
-    printf("Close5 SSE2 : \n"); close5_SSE2(img1, vi1+1, vj1+1, img2, buffer);
+    // printf("Close5 SSE2 : \n"); close5_SSE2(img1, vi1+1, vj1+1, img2, buffer);
     // printf("Close5 SSE2 optimisé : \n"); close5_SSE2_opt(img1, vi1+1, vj1+1, img2, buffer);
 
     display_vui8matrix(img2, vi0, vi1, vj0, vj1, "%3d", "img2 = ");
@@ -487,13 +506,16 @@ void f_test_close5_SSE2()
 
 void f_test_morpho_SSE2()
 {
+    /* Fonction test de macros SIMD */
     // f_test_macro();
 
+    /* Tests 3x3 */
     // f_test_dilate3_SSE2();
     // f_test_erode3_SSE2();
     f_test_open3_SSE2();
     // f_test_close3_SSE2();
 
+    /* Tests 5x5 */
     // f_test_dilate5_SSE2();
     // f_test_erode5_SSE2();
     // f_test_open5_SSE2();

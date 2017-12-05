@@ -30,6 +30,11 @@ void dilate_bin3(uint8_t** src, int size_h, int size_l, uint8_t** dest)
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i+1][-1] = src[i+1][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -62,6 +67,11 @@ void erode_bin3(uint8_t** src, int size_h, int size_l, uint8_t** dest)
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i+1][-1] = src[i+1][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -97,6 +107,11 @@ void close_bin3(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t**
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i+1][-1] = src[i+1][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -115,6 +130,11 @@ void close_bin3(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t**
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        buffer[i][-1] = buffer[i][0];
+        buffer[i+1][-1] = buffer[i+1][0];
+        buffer[i][(size_l-1)+1] = buffer[i][size_l-1];
+        buffer[i+1][(size_l-1)+1] = buffer[i+1][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -149,6 +169,11 @@ void open_bin3(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t** 
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i+1][-1] = src[i+1][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -167,6 +192,11 @@ void open_bin3(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t** 
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        buffer[i][-1] = buffer[i][0];
+        buffer[i+1][-1] = buffer[i+1][0];
+        buffer[i][(size_l-1)+1] = buffer[i][size_l-1];
+        buffer[i+1][(size_l-1)+1] = buffer[i+1][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -199,6 +229,19 @@ void dilate_bin5(uint8_t** src, int size_h, int size_l, uint8_t** dest)
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i][-2] = src[i][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i][(size_l-1)+2] = src[i][size_l-1];
+        src[i+1][-1] = src[i+1][0];
+        src[i+1][-2] = src[i+1][0];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+        src[i+1][(size_l-1)+2] = src[i+1][size_l-1];
+        src[i+2][-1] = src[i+2][0];
+        src[i+2][-2] = src[i+2][0];
+        src[i+2][(size_l-1)+1] = src[i+2][size_l-1];
+        src[i+2][(size_l-1)+2] = src[i+2][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -231,6 +274,19 @@ void erode_bin5(uint8_t** src, int size_h, int size_l, uint8_t** dest)
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i][-2] = src[i][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i][(size_l-1)+2] = src[i][size_l-1];
+        src[i+1][-1] = src[i+1][0];
+        src[i+1][-2] = src[i+1][0];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+        src[i+1][(size_l-1)+2] = src[i+1][size_l-1];
+        src[i+2][-1] = src[i+2][0];
+        src[i+2][-2] = src[i+2][0];
+        src[i+2][(size_l-1)+1] = src[i+2][size_l-1];
+        src[i+2][(size_l-1)+2] = src[i+2][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -265,6 +321,19 @@ void open_bin5(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t** 
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i][-2] = src[i][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i][(size_l-1)+2] = src[i][size_l-1];
+        src[i+1][-1] = src[i+1][0];
+        src[i+1][-2] = src[i+1][0];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+        src[i+1][(size_l-1)+2] = src[i+1][size_l-1];
+        src[i+2][-1] = src[i+2][0];
+        src[i+2][-2] = src[i+2][0];
+        src[i+2][(size_l-1)+1] = src[i+2][size_l-1];
+        src[i+2][(size_l-1)+2] = src[i+2][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -283,6 +352,19 @@ void open_bin5(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t** 
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        buffer[i][-1] = buffer[i][0];
+        buffer[i][-2] = buffer[i][0];
+        buffer[i][(size_l-1)+1] = buffer[i][size_l-1];
+        buffer[i][(size_l-1)+2] = buffer[i][size_l-1];
+        buffer[i+1][-1] = buffer[i+1][0];
+        buffer[i+1][-2] = buffer[i+1][0];
+        buffer[i+1][(size_l-1)+1] = buffer[i+1][size_l-1];
+        buffer[i+1][(size_l-1)+2] = buffer[i+1][size_l-1];
+        buffer[i+2][-1] = buffer[i+2][0];
+        buffer[i+2][-2] = buffer[i+2][0];
+        buffer[i+2][(size_l-1)+1] = buffer[i+2][size_l-1];
+        buffer[i+2][(size_l-1)+2] = buffer[i+2][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -317,6 +399,19 @@ void close_bin5(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t**
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i][-2] = src[i][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i][(size_l-1)+2] = src[i][size_l-1];
+        src[i+1][-1] = src[i+1][0];
+        src[i+1][-2] = src[i+1][0];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+        src[i+1][(size_l-1)+2] = src[i+1][size_l-1];
+        src[i+2][-1] = src[i+2][0];
+        src[i+2][-2] = src[i+2][0];
+        src[i+2][(size_l-1)+1] = src[i+2][size_l-1];
+        src[i+2][(size_l-1)+2] = src[i+2][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -335,6 +430,19 @@ void close_bin5(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t**
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        buffer[i][-1] = buffer[i][0];
+        buffer[i][-2] = buffer[i][0];
+        buffer[i][(size_l-1)+1] = buffer[i][size_l-1];
+        buffer[i][(size_l-1)+2] = buffer[i][size_l-1];
+        buffer[i+1][-1] = buffer[i+1][0];
+        buffer[i+1][-2] = buffer[i+1][0];
+        buffer[i+1][(size_l-1)+1] = buffer[i+1][size_l-1];
+        buffer[i+1][(size_l-1)+2] = buffer[i+1][size_l-1];
+        buffer[i+2][-1] = buffer[i+2][0];
+        buffer[i+2][-2] = buffer[i+2][0];
+        buffer[i+2][(size_l-1)+1] = buffer[i+2][size_l-1];
+        buffer[i+2][(size_l-1)+2] = buffer[i+2][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -368,6 +476,11 @@ void dilate3(uint8_t** src, int size_h, int size_l, uint8_t** dest)
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i+1][-1] = src[i+1][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -404,6 +517,11 @@ void erode3(uint8_t** src, int size_h, int size_l, uint8_t** dest)
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i+1][-1] = src[i+1][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -442,6 +560,11 @@ void open3(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t** buff
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i+1][-1] = src[i+1][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -463,6 +586,11 @@ void open3(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t** buff
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        buffer[i][-1] = buffer[i][0];
+        buffer[i+1][-1] = buffer[i+1][0];
+        buffer[i][(size_l-1)+1] = buffer[i][size_l-1];
+        buffer[i+1][(size_l-1)+1] = buffer[i+1][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -501,6 +629,11 @@ void close3(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t** buf
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i+1][-1] = src[i+1][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -522,6 +655,11 @@ void close3(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t** buf
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        buffer[i][-1] = buffer[i][0];
+        buffer[i+1][-1] = buffer[i+1][0];
+        buffer[i][(size_l-1)+1] = buffer[i][size_l-1];
+        buffer[i+1][(size_l-1)+1] = buffer[i+1][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -558,6 +696,19 @@ void dilate5(uint8_t** src, int size_h, int size_l, uint8_t** dest)
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i][-2] = src[i][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i][(size_l-1)+2] = src[i][size_l-1];
+        src[i+1][-1] = src[i+1][0];
+        src[i+1][-2] = src[i+1][0];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+        src[i+1][(size_l-1)+2] = src[i+1][size_l-1];
+        src[i+2][-1] = src[i+2][0];
+        src[i+2][-2] = src[i+2][0];
+        src[i+2][(size_l-1)+1] = src[i+2][size_l-1];
+        src[i+2][(size_l-1)+2] = src[i+2][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -594,6 +745,19 @@ void erode5(uint8_t** src, int size_h, int size_l, uint8_t** dest)
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i][-2] = src[i][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i][(size_l-1)+2] = src[i][size_l-1];
+        src[i+1][-1] = src[i+1][0];
+        src[i+1][-2] = src[i+1][0];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+        src[i+1][(size_l-1)+2] = src[i+1][size_l-1];
+        src[i+2][-1] = src[i+2][0];
+        src[i+2][-2] = src[i+2][0];
+        src[i+2][(size_l-1)+1] = src[i+2][size_l-1];
+        src[i+2][(size_l-1)+2] = src[i+2][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -632,6 +796,19 @@ void open5(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t** buff
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i][-2] = src[i][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i][(size_l-1)+2] = src[i][size_l-1];
+        src[i+1][-1] = src[i+1][0];
+        src[i+1][-2] = src[i+1][0];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+        src[i+1][(size_l-1)+2] = src[i+1][size_l-1];
+        src[i+2][-1] = src[i+2][0];
+        src[i+2][-2] = src[i+2][0];
+        src[i+2][(size_l-1)+1] = src[i+2][size_l-1];
+        src[i+2][(size_l-1)+2] = src[i+2][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -653,6 +830,19 @@ void open5(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t** buff
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        buffer[i][-1] = buffer[i][0];
+        buffer[i][-2] = buffer[i][0];
+        buffer[i][(size_l-1)+1] = buffer[i][size_l-1];
+        buffer[i][(size_l-1)+2] = buffer[i][size_l-1];
+        buffer[i+1][-1] = buffer[i+1][0];
+        buffer[i+1][-2] = buffer[i+1][0];
+        buffer[i+1][(size_l-1)+1] = buffer[i+1][size_l-1];
+        buffer[i+1][(size_l-1)+2] = buffer[i+1][size_l-1];
+        buffer[i+2][-1] = buffer[i+2][0];
+        buffer[i+2][-2] = buffer[i+2][0];
+        buffer[i+2][(size_l-1)+1] = buffer[i+2][size_l-1];
+        buffer[i+2][(size_l-1)+2] = buffer[i+2][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -691,6 +881,19 @@ void close5(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t** buf
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        src[i][-1] = src[i][0];
+        src[i][-2] = src[i][0];
+        src[i][(size_l-1)+1] = src[i][size_l-1];
+        src[i][(size_l-1)+2] = src[i][size_l-1];
+        src[i+1][-1] = src[i+1][0];
+        src[i+1][-2] = src[i+1][0];
+        src[i+1][(size_l-1)+1] = src[i+1][size_l-1];
+        src[i+1][(size_l-1)+2] = src[i+1][size_l-1];
+        src[i+2][-1] = src[i+2][0];
+        src[i+2][-2] = src[i+2][0];
+        src[i+2][(size_l-1)+1] = src[i+2][size_l-1];
+        src[i+2][(size_l-1)+2] = src[i+2][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant
@@ -712,6 +915,19 @@ void close5(uint8_t** src, int size_h, int size_l, uint8_t** dest, uint8_t** buf
     // Parcours image
     for(i = 0; i < size_h; i++)
     {
+        buffer[i][-1] = buffer[i][0];
+        buffer[i][-2] = buffer[i][0];
+        buffer[i][(size_l-1)+1] = buffer[i][size_l-1];
+        buffer[i][(size_l-1)+2] = buffer[i][size_l-1];
+        buffer[i+1][-1] = buffer[i+1][0];
+        buffer[i+1][-2] = buffer[i+1][0];
+        buffer[i+1][(size_l-1)+1] = buffer[i+1][size_l-1];
+        buffer[i+1][(size_l-1)+2] = buffer[i+1][size_l-1];
+        buffer[i+2][-1] = buffer[i+2][0];
+        buffer[i+2][-2] = buffer[i+2][0];
+        buffer[i+2][(size_l-1)+1] = buffer[i+2][size_l-1];
+        buffer[i+2][(size_l-1)+2] = buffer[i+2][size_l-1];
+
         for(j = 0; j < size_l; j++)
         {
             // Parcours Element structurant

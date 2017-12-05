@@ -1,5 +1,5 @@
 /*--------------------------------
-    morpho_SSE2.c
+    morpho_SSE2_opt.c
 
     Fonctions de morphologie mathématique parallelises en SIMD + optimisations
 
@@ -412,6 +412,12 @@ void open3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8*
     dilate3_vector_SSE2_opt(buffer, size_h, size_l, dest, size_h-1);
 }
 
+
+void open3_SSE2_test(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer)
+{
+    erode3_SSE2_opt(src, size_h, size_l, buffer);
+    dilate3_SSE2_opt(buffer, size_h, size_l, dest);
+}
 
 /**
  *  (SIMD) Fermeture en niveau de gris d'une image avec un élément structurant de taille 3x3

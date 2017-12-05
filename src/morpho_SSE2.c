@@ -47,11 +47,16 @@ void dilate3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest)
 
             for(di = -1; di <= 1; di++)
             {
-                    x_1 = _mm_load_si128(&src[i+di][j-1]);
                     x0  = _mm_load_si128(&src[i+di][j+0]);
+                    x_1 = _mm_load_si128(&src[i+di][j-1]);
                     x1  = _mm_load_si128(&src[i+di][j+1]);
+
                     xr = vec_right1(x_1, x0);
                     xl = vec_left1(x0, x1);
+
+                    DEBUG(display_vuint8(xr, "%3d", " xr = "));DEBUG(puts(""));
+                    DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
+                    DEBUG(display_vuint8(xl, "%3d", " xl = "));DEBUG(puts(""));
 
                     y = vec_max3(xl, x0, xr);
                     dilat = _mm_max_epu8(dilat, y);
@@ -88,15 +93,31 @@ void erode3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest)
 
             for(di = -1; di <= 1; di++)
             {
-                    x_1 = _mm_load_si128(&src[i+di][j-1]);
-                    x0  = _mm_load_si128(&src[i+di][j+0]);
-                    x1  = _mm_load_si128(&src[i+di][j+1]);
-                    xr = vec_right1(x_1, x0);
-                    xl = vec_left1(x0, x1);
+                x0  = _mm_load_si128(&src[i+di][j+0]);
 
-                    y = vec_min3(xl, x0, xr);
-                    erod = _mm_min_epu8(erod, y);
+                if(j == 0){
+                    xr = vec_dup_bord_l1(x0);
+                }
+                else{
+                    x_1 = _mm_load_si128(&src[i+di][j-1]);
+                    xr = vec_right1(x_1, x0);
+                }
+
+                if(j == (size_l-1)){
+                    xl = vec_dup_bord_r1(x0);
+                }
+                else{
+                    x1  = _mm_load_si128(&src[i+di][j+1]);
+                    xl = vec_left1(x0, x1);
+                }
+                DEBUG(display_vuint8(xr, "%3d", " xr = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl, "%3d", " xl = "));DEBUG(puts(""));
+
+                y = vec_min3(xl, x0, xr);
+                erod = _mm_min_epu8(erod, y);
             }
+
             DEBUG(display_vuint8(erod, "%3d", " erod = "));DEBUG(puts("\n"));
             _mm_store_si128(&dest[i][j], erod);
         }
@@ -129,22 +150,36 @@ void open3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** bu
 
             for(di = -1; di <= 1; di++)
             {
-                    x_1 = _mm_load_si128(&src[i+di][j-1]);
-                    x0  = _mm_load_si128(&src[i+di][j+0]);
-                    x1  = _mm_load_si128(&src[i+di][j+1]);
-                    xr = vec_right1(x_1, x0);
-                    xl = vec_left1(x0, x1);
+                x0  = _mm_load_si128(&src[i+di][j+0]);
 
-                    y = vec_min3(xl, x0, xr);
-                    erod = _mm_min_epu8(erod, y);
+                if(j == 0){
+                    xr = vec_dup_bord_l1(x0);
+                }
+                else{
+                    x_1 = _mm_load_si128(&src[i+di][j-1]);
+                    xr = vec_right1(x_1, x0);
+                }
+
+                if(j == (size_l-1)){
+                    xl = vec_dup_bord_r1(x0);
+                }
+                else{
+                    x1  = _mm_load_si128(&src[i+di][j+1]);
+                    xl = vec_left1(x0, x1);
+                }
+                DEBUG(display_vuint8(xr, "%3d", " xr = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(x0, "%3d", " x0 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl, "%3d", " xl = "));DEBUG(puts(""));
+
+                y = vec_min3(xl, x0, xr);
+                erod = _mm_min_epu8(erod, y);
             }
-            // DEBUG(display_vuint8(erod, "%3d", " erod = "));DEBUG(puts("\n"));
-            DEBUG(display_vuint8(erod, "%3d", ""));
+            DEBUG(puts(""));
+            DEBUG(display_vuint8(erod, "%3d", " erod = "));DEBUG(puts("\n"));
             _mm_store_si128(&buffer[i][j], erod);
         }
-        DEBUG(puts(""));
     }
-    DEBUG(puts(""));
+    DEBUG(puts("---------------------------------------------------------------"));
 
     // Parcours image
     for(i = 0; i <= (size_h-1); i++)
@@ -155,17 +190,32 @@ void open3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** bu
 
             for(di = -1; di <= 1; di++)
             {
-                    x_1 = _mm_load_si128(&buffer[i+di][j-1]);
-                    x0  = _mm_load_si128(&buffer[i+di][j+0]);
-                    x1  = _mm_load_si128(&buffer[i+di][j+1]);
-                    xr = vec_right1(x_1, x0);
-                    xl = vec_left1(x0, x1);
+                x0  = _mm_load_si128(&buffer[i+di][j+0]);
 
-                    y = vec_max3(xl, x0, xr);
-                    dilat = _mm_max_epu8(dilat, y);
+                if(j == 0){
+                    xr = vec_dup_bord_l1(x0);
+                }
+                else{
+                    x_1 = _mm_load_si128(&buffer[i+di][j-1]);
+                    xr = vec_right1(x_1, x0);
+                }
+
+                if(j == (size_l-1)){
+                    xl = vec_dup_bord_r1(x0);
+                }
+                else{
+                    x1  = _mm_load_si128(&buffer[i+di][j+1]);
+                    xl = vec_left1(x0, x1);
+                }
+
+                DEBUG(display_vuint8(xr, "%3d", " xr = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(x0, "%3d", " x0 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl, "%3d", " xl = "));DEBUG(puts("\n"));
+
+                y = vec_max3(xl, x0, xr);
+                dilat = _mm_max_epu8(dilat, y);
             }
-            // DEBUG(display_vuint8(dilat, "%3d", " dilat = "));DEBUG(puts("\n"));
-            DEBUG(display_vuint8(dilat, "%3d",""));
+            DEBUG(display_vuint8(dilat, "%3d", " dilat = "));DEBUG(puts("\n"));
             _mm_store_si128(&dest[i][j], dilat);
         }
         DEBUG(puts(""));
@@ -200,14 +250,30 @@ void close3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** b
 
             for(di = -1; di <= 1; di++)
             {
-                    x_1 = _mm_load_si128(&src[i+di][j-1]);
-                    x0  = _mm_load_si128(&src[i+di][j+0]);
-                    x1  = _mm_load_si128(&src[i+di][j+1]);
-                    xr = vec_right1(x_1, x0);
-                    xl = vec_left1(x0, x1);
+                x0  = _mm_load_si128(&src[i+di][j+0]);
 
-                    y = vec_max3(xl, x0, xr);
-                    dilat = _mm_max_epu8(dilat, y);
+                if(j == 0){
+                    xr = vec_dup_bord_l1(x0);
+                }
+                else{
+                    x_1 = _mm_load_si128(&src[i+di][j-1]);
+                    xr = vec_right1(x_1, x0);
+                }
+
+                if(j == (size_l-1)){
+                    xl = vec_dup_bord_r1(x0);
+                }
+                else{
+                    x1  = _mm_load_si128(&src[i+di][j+1]);
+                    xl = vec_left1(x0, x1);
+                }
+
+                DEBUG(display_vuint8(xr, "%3d", " xr = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl, "%3d", " xl = "));DEBUG(puts(""));
+
+                y = vec_max3(xl, x0, xr);
+                dilat = _mm_max_epu8(dilat, y);
             }
             DEBUG(display_vuint8(dilat, "%3d", " dilat = "));DEBUG(puts("\n"));
             _mm_store_si128(&buffer[i][j], dilat);
@@ -223,14 +289,30 @@ void close3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** b
 
             for(di = -1; di <= 1; di++)
             {
-                    x_1 = _mm_load_si128(&buffer[i+di][j-1]);
-                    x0  = _mm_load_si128(&buffer[i+di][j+0]);
-                    x1  = _mm_load_si128(&buffer[i+di][j+1]);
-                    xr = vec_right1(x_1, x0);
-                    xl = vec_left1(x0, x1);
+                x0  = _mm_load_si128(&buffer[i+di][j+0]);
 
-                    y = vec_min3(xl, x0, xr);
-                    erod = _mm_min_epu8(erod, y);
+                if(j == 0){
+                    xr = vec_dup_bord_l1(x0);
+                }
+                else{
+                    x_1 = _mm_load_si128(&buffer[i+di][j-1]);
+                    xr = vec_right1(x_1, x0);
+                }
+
+                if(j == (size_l-1)){
+                    xl = vec_dup_bord_r1(x0);
+                }
+                else{
+                    x1  = _mm_load_si128(&buffer[i+di][j+1]);
+                    xl = vec_left1(x0, x1);
+                }
+
+                DEBUG(display_vuint8(xr, "%3d", " xr = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl, "%3d", " xl = "));DEBUG(puts(""));
+
+                y = vec_min3(xl, x0, xr);
+                erod = _mm_min_epu8(erod, y);
             }
             DEBUG(display_vuint8(erod, "%3d", " erod = "));DEBUG(puts("\n"));
             _mm_store_si128(&dest[i][j], erod);
@@ -264,14 +346,27 @@ void dilate5_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest)
 
             for(di = -2; di <= 2; di++)
             {
-                x_1 = _mm_load_si128(&src[i+di][j-1]);
                 x0  = _mm_load_si128(&src[i+di][j+0]);
-                x1  = _mm_load_si128(&src[i+di][j+1]);
 
-                xr2 = vec_right2(x_1, x0);
-                xr1 = vec_right1(x_1, x0);
-                xl1 = vec_left1(x0, x1);
-                xl2 = vec_left2(x0, x1);
+                if(j == 0){
+                    xr2 = vec_dup_bord_l2(x0);
+                    xr1 = vec_dup_bord_l1(x0);
+                }
+                else{
+                    x_1 = _mm_load_si128(&src[i+di][j-1]);
+                    xr2 = vec_right2(x_1, x0);
+                    xr1 = vec_right1(x_1, x0);
+                }
+
+                if(j == (size_l-1)){
+                    xl1 = vec_dup_bord_r1(x0);
+                    xl2 = vec_dup_bord_r2(x0);
+                }
+                else{
+                    x1  = _mm_load_si128(&src[i+di][j+1]);
+                    xl1 = vec_left1(x0, x1);
+                    xl2 = vec_left2(x0, x1);
+                }
 
                 DEBUG(display_vuint8(xr2, "%3d", " xr2 = "));DEBUG(puts(""));
                 DEBUG(display_vuint8(xr1, "%3d", " xr1 = "));DEBUG(puts(""));
@@ -315,23 +410,36 @@ void erode5_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest)
 
             for(di = -1; di <= 1; di++)
             {
-                    x_1 = _mm_load_si128(&src[i+di][j-1]);
-                    x0  = _mm_load_si128(&src[i+di][j+0]);
-                    x1  = _mm_load_si128(&src[i+di][j+1]);
+                x0  = _mm_load_si128(&src[i+di][j+0]);
 
+                if(j == 0){
+                    xr2 = vec_dup_bord_l2(x0);
+                    xr1 = vec_dup_bord_l1(x0);
+                }
+                else{
+                    x_1 = _mm_load_si128(&src[i+di][j-1]);
                     xr2 = vec_right2(x_1, x0);
                     xr1 = vec_right1(x_1, x0);
+                }
+
+                if(j == (size_l-1)){
+                    xl1 = vec_dup_bord_r1(x0);
+                    xl2 = vec_dup_bord_r2(x0);
+                }
+                else{
+                    x1  = _mm_load_si128(&src[i+di][j+1]);
                     xl1 = vec_left1(x0, x1);
                     xl2 = vec_left2(x0, x1);
+                }
 
-                    DEBUG(display_vuint8(xr2, "%3d", " xr2 = "));DEBUG(puts(""));
-                    DEBUG(display_vuint8(xr1, "%3d", " xr1 = "));DEBUG(puts(""));
-                    DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
-                    DEBUG(display_vuint8(xl1, "%3d", " xl1 = "));DEBUG(puts(""));
-                    DEBUG(display_vuint8(xl2, "%3d", " xl2 = "));DEBUG(puts("\n"));
+                DEBUG(display_vuint8(xr2, "%3d", " xr2 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xr1, "%3d", " xr1 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl1, "%3d", " xl1 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl2, "%3d", " xl2 = "));DEBUG(puts("\n"));
 
-                    y = vec_min5(xr2, xr1, x0, xl1, xl2);
-                    erod = _mm_min_epu8(erod, y);
+                y = vec_min5(xr2, xr1, x0, xl1, xl2);
+                erod = _mm_min_epu8(erod, y);
             }
             DEBUG(display_vuint8(erod, "%3d", " erod = "));DEBUG(puts("\n"));
             _mm_store_si128(&dest[i][j], erod);
@@ -365,23 +473,36 @@ void open5_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** bu
 
             for(di = -1; di <= 1; di++)
             {
-                    x_1 = _mm_load_si128(&src[i+di][j-1]);
-                    x0  = _mm_load_si128(&src[i+di][j+0]);
-                    x1  = _mm_load_si128(&src[i+di][j+1]);
+                x0  = _mm_load_si128(&src[i+di][j+0]);
 
+                if(j == 0){
+                    xr2 = vec_dup_bord_l2(x0);
+                    xr1 = vec_dup_bord_l1(x0);
+                }
+                else{
+                    x_1 = _mm_load_si128(&src[i+di][j-1]);
                     xr2 = vec_right2(x_1, x0);
                     xr1 = vec_right1(x_1, x0);
+                }
+
+                if(j == (size_l-1)){
+                    xl1 = vec_dup_bord_r1(x0);
+                    xl2 = vec_dup_bord_r2(x0);
+                }
+                else{
+                    x1  = _mm_load_si128(&src[i+di][j+1]);
                     xl1 = vec_left1(x0, x1);
                     xl2 = vec_left2(x0, x1);
+                }
 
-                    // DEBUG(display_vuint8(xr2, "%3d", " xr2 = "));DEBUG(puts(""));
-                    // DEBUG(display_vuint8(xr1, "%3d", " xr1 = "));DEBUG(puts(""));
-                    // DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
-                    // DEBUG(display_vuint8(xl1, "%3d", " xl1 = "));DEBUG(puts(""));
-                    // DEBUG(display_vuint8(xl2, "%3d", " xl2 = "));DEBUG(puts("\n"));
+                DEBUG(display_vuint8(xr2, "%3d", " xr2 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xr1, "%3d", " xr1 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl1, "%3d", " xl1 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl2, "%3d", " xl2 = "));DEBUG(puts("\n"));
 
-                    y = vec_min5(xr2, xr1, x0, xl1, xl2);
-                    erod = _mm_min_epu8(erod, y);
+                y = vec_min5(xr2, xr1, x0, xl1, xl2);
+                erod = _mm_min_epu8(erod, y);
             }
             DEBUG(display_vuint8(erod, "%3d", " erod = "));DEBUG(puts(""));
             _mm_store_si128(&buffer[i][j], erod);
@@ -399,23 +520,36 @@ void open5_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** bu
 
             for(di = -1; di <= 1; di++)
             {
-                    x_1 = _mm_load_si128(&buffer[i+di][j-1]);
-                    x0  = _mm_load_si128(&buffer[i+di][j+0]);
-                    x1  = _mm_load_si128(&buffer[i+di][j+1]);
+                x0  = _mm_load_si128(&src[i+di][j+0]);
 
+                if(j == 0){
+                    xr2 = vec_dup_bord_l2(x0);
+                    xr1 = vec_dup_bord_l1(x0);
+                }
+                else{
+                    x_1 = _mm_load_si128(&src[i+di][j-1]);
                     xr2 = vec_right2(x_1, x0);
                     xr1 = vec_right1(x_1, x0);
+                }
+
+                if(j == (size_l-1)){
+                    xl1 = vec_dup_bord_r1(x0);
+                    xl2 = vec_dup_bord_r2(x0);
+                }
+                else{
+                    x1  = _mm_load_si128(&src[i+di][j+1]);
                     xl1 = vec_left1(x0, x1);
                     xl2 = vec_left2(x0, x1);
+                }
 
-                    // DEBUG(display_vuint8(xr2, "%3d", " xr2 = "));DEBUG(puts(""));
-                    // DEBUG(display_vuint8(xr1, "%3d", " xr1 = "));DEBUG(puts(""));
-                    // DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
-                    // DEBUG(display_vuint8(xl1, "%3d", " xl1 = "));DEBUG(puts(""));
-                    // DEBUG(display_vuint8(xl2, "%3d", " xl2 = "));DEBUG(puts("\n"));
+                DEBUG(display_vuint8(xr2, "%3d", " xr2 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xr1, "%3d", " xr1 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl1, "%3d", " xl1 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl2, "%3d", " xl2 = "));DEBUG(puts("\n"));
 
-                    y = vec_max5(xr2, xr1, x0, xl1, xl2);
-                    dilat = _mm_max_epu8(dilat, y);
+                y = vec_max5(xr2, xr1, x0, xl1, xl2);
+                dilat = _mm_max_epu8(dilat, y);
             }
             DEBUG(display_vuint8(dilat, "%3d", " dilat = "));DEBUG(puts(""));
             _mm_store_si128(&dest[i][j], dilat);
@@ -452,23 +586,36 @@ void close5_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** b
 
             for(di = -1; di <= 1; di++)
             {
-                    x_1 = _mm_load_si128(&src[i+di][j-1]);
-                    x0  = _mm_load_si128(&src[i+di][j+0]);
-                    x1  = _mm_load_si128(&src[i+di][j+1]);
+                x0  = _mm_load_si128(&src[i+di][j+0]);
 
+                if(j == 0){
+                    xr2 = vec_dup_bord_l2(x0);
+                    xr1 = vec_dup_bord_l1(x0);
+                }
+                else{
+                    x_1 = _mm_load_si128(&src[i+di][j-1]);
                     xr2 = vec_right2(x_1, x0);
                     xr1 = vec_right1(x_1, x0);
+                }
+
+                if(j == (size_l-1)){
+                    xl1 = vec_dup_bord_r1(x0);
+                    xl2 = vec_dup_bord_r2(x0);
+                }
+                else{
+                    x1  = _mm_load_si128(&src[i+di][j+1]);
                     xl1 = vec_left1(x0, x1);
                     xl2 = vec_left2(x0, x1);
+                }
 
-                    DEBUG(display_vuint8(xr2, "%3d", " xr2 = "));DEBUG(puts(""));
-                    DEBUG(display_vuint8(xr1, "%3d", " xr1 = "));DEBUG(puts(""));
-                    DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
-                    DEBUG(display_vuint8(xl1, "%3d", " xl1 = "));DEBUG(puts(""));
-                    DEBUG(display_vuint8(xl2, "%3d", " xl2 = "));DEBUG(puts("\n"));
+                DEBUG(display_vuint8(xr2, "%3d", " xr2 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xr1, "%3d", " xr1 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl1, "%3d", " xl1 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl2, "%3d", " xl2 = "));DEBUG(puts("\n"));
 
-                    y = vec_max5(xr2, xr1, x0, xl1, xl2);
-                    dilat = _mm_max_epu8(dilat, y);
+                y = vec_max5(xr2, xr1, x0, xl1, xl2);
+                dilat = _mm_max_epu8(dilat, y);
             }
             DEBUG(display_vuint8(dilat, "%3d", " dilat = "));DEBUG(puts("\n"));
             _mm_store_si128(&buffer[i][j], dilat);
@@ -484,23 +631,36 @@ void close5_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** b
 
             for(di = -1; di <= 1; di++)
             {
-                    x_1 = _mm_load_si128(&buffer[i+di][j-1]);
-                    x0  = _mm_load_si128(&buffer[i+di][j+0]);
-                    x1  = _mm_load_si128(&buffer[i+di][j+1]);
+                x0  = _mm_load_si128(&src[i+di][j+0]);
 
+                if(j == 0){
+                    xr2 = vec_dup_bord_l2(x0);
+                    xr1 = vec_dup_bord_l1(x0);
+                }
+                else{
+                    x_1 = _mm_load_si128(&src[i+di][j-1]);
                     xr2 = vec_right2(x_1, x0);
                     xr1 = vec_right1(x_1, x0);
+                }
+
+                if(j == (size_l-1)){
+                    xl1 = vec_dup_bord_r1(x0);
+                    xl2 = vec_dup_bord_r2(x0);
+                }
+                else{
+                    x1  = _mm_load_si128(&src[i+di][j+1]);
                     xl1 = vec_left1(x0, x1);
                     xl2 = vec_left2(x0, x1);
+                }
 
-                    DEBUG(display_vuint8(xr2, "%3d", " xr2 = "));DEBUG(puts(""));
-                    DEBUG(display_vuint8(xr1, "%3d", " xr1 = "));DEBUG(puts(""));
-                    DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
-                    DEBUG(display_vuint8(xl1, "%3d", " xl1 = "));DEBUG(puts(""));
-                    DEBUG(display_vuint8(xl2, "%3d", " xl2 = "));DEBUG(puts("\n"));
+                DEBUG(display_vuint8(xr2, "%3d", " xr2 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xr1, "%3d", " xr1 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl1, "%3d", " xl1 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl2, "%3d", " xl2 = "));DEBUG(puts("\n"));
 
-                    y = vec_min5(xr2, xr1, x0, xl1, xl2);
-                    erod = _mm_min_epu8(erod, y);
+                y = vec_min5(xr2, xr1, x0, xl1, xl2);
+                erod = _mm_min_epu8(erod, y);
             }
             DEBUG(display_vuint8(erod, "%3d", " erod = "));DEBUG(puts("\n"));
             _mm_store_si128(&dest[i][j], erod);

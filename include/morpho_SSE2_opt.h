@@ -11,6 +11,10 @@
 #ifndef __MORPHO_SSE2_OPT_H__
 #define __MORPHO_SSE2_OPT_H__
 
+
+void open3_SSE2_test(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer);
+
+
 /**
  *  (SIMD) Dilataion d'une image avec un élément structurant de taille 3x3
  *
