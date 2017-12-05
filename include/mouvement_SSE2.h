@@ -13,8 +13,8 @@
 #define NB_IMAGE 200
 #define THETA 20
 #define N 3
-#define VMAX 40
-#define VMIN 20
+#define VMAX 50
+#define VMIN 30
 
 /**
  *	Routine de l'algorithme de Frame Difference
