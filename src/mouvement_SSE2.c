@@ -157,9 +157,7 @@ vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 			a = _mm_and_si128(a, v_0x01);
 			// a <- M+1 si a == 1
 			// 		M	sinon
-			a = _mm_adds_epu8(v_m, a);
-			// M <- a
-			_mm_store_si128(&M[i][j], a);
+			v_m = _mm_adds_epu8(v_m, a);
 
 			// b <- 255 si M < It_1
 			//		0	sinon
@@ -169,9 +167,9 @@ vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 			b = _mm_and_si128(b, v_0x01);
 			// b <- M-1 si b == 1
 			// 		M   sinon
-			b = _mm_sub_epi8(v_m, b);
+			v_m = _mm_sub_epi8(v_m, b);
 			// M <- b
-			_mm_store_si128(&M[i][j], b);
+			_mm_store_si128(&M[i][j], v_m);
 		}
 	}
 
@@ -214,9 +212,7 @@ vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 			a = _mm_and_si128(a, v_0x01);
 			// a <- V+1	si a == 1
 			//		V 	sinon
-			a = _mm_add_epi8(v_var, a);
-			// V <- a 
-			_mm_store_si128(&V[i][j], a);
+			v_var = _mm_add_epi8(v_var, a);
 
 			// b <- 255	si V > NxIt_1
 			// 		0	sinon
@@ -226,9 +222,7 @@ vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 			b = _mm_and_si128(b, v_0x01);
 			// b <- V-1	si b == 1
 			//		V 	sinon	
-			b = _mm_sub_epi8(v_var, b);
-			// V <- b
-			_mm_store_si128(&V[i][j], b); 
+			v_var = _mm_sub_epi8(v_var, b);
 
 			// Clamp to [VMIN, VMAX]
 			// a <- min(V, VMAX)

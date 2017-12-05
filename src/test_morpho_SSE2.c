@@ -1,12 +1,9 @@
 /*--------------------------------
     test_morpho_SSE2.c
-
     Fonctions de tests unitaires et d'intégration des fonctions de
     morphologie mathématique en SIMD
-
     Projet SIMD - Implementation d'une chaine de detection de mouvement
     temps-reel sur un processeur multi-coeurs SIMD
-
     Kevin Seng - 2017
  ----------------------------------*/
 #include <stdlib.h>

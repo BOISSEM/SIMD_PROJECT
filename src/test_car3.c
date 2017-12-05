@@ -153,7 +153,7 @@ void f_test_fd_car3(){
 
         Et = routine_FrameDifference(img_t0, img_t1, img_size_h, img_size_l, diff, Et);
 
-        sprintf(img_out_name, "img/car3_bin_FD/car_%03d.pgm", i);
+        sprintf(img_out_name, "img/car3_bin_FD/car_%03d.pgm", 3000+i);
         creation_pgm(img_out_name, img_size_h, img_size_l, maxval, Et);
     }
 }
@@ -499,5 +499,5 @@ void f_test_mouvement_car3(){
     f_test_fd_car3();
     //f_test_sd_car3();
     //f_test_fd_morpho_car3();
-    f_test_veriteTerrain();
+    //f_test_veriteTerrain();
 }
