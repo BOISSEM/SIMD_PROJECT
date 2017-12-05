@@ -37,6 +37,7 @@ long int ROC[2][2];
 
 vuint8** copy_pgm_vector(char* fname, vuint8** image, int size_h, int size_l)	{
 	int i, j;
+	vuint8 pixels;
 	FILE* fp;
 
 	if((fp = fopen(fname, "rb"))==NULL)	{
@@ -52,10 +53,11 @@ vuint8** copy_pgm_vector(char* fname, vuint8** image, int size_h, int size_l)	{
 
 	//Copie de l'image dans la matrice de vecteur 
 	for(i = 0; i < size_h; i++)	{
-		for(j = 0; j < size_l; j++)	{
-			fread(&(image[i][j]), sizeof(vuint8), size_l, fp);
-			display_vuint8(image[i][j], " %3d ", "image");
-    		printf("\n");
+		for(j = 0; j < size_l; j+=16)	{
+			fread(&pixels, sizeof(vuint8), 1, fp);
+			_mm_store_si128(&image[i][j/16], pixels);
+			// display_vuint8(image[i][j], " %3d ", "image");
+   //  		printf("\n");
 		}
 	}
 
@@ -119,24 +121,43 @@ void f_test_fd_car3_SSE2()	{
 
     fclose(fp);
 
-    for(i=0; i<NB_IMAGE-1; i++)
-    {
-        sprintf(img0_name, "img/car3/car_%d.pgm", 3000+i);
-        sprintf(img1_name, "img/car3/car_%d.pgm", 3000+i+1);
+    sprintf(img0_name, "img/car3/car_%d.pgm", 3002);
+    sprintf(img1_name, "img/car3/car_%d.pgm", 3002+1);
+    copy_pgm_vector(img0_name, img_t0, img_size_h, img_size_l);
+    copy_pgm_vector(img1_name, img_t1, img_size_h, img_size_l);
 
-        copy_pgm_vector(img0_name, img_t0, img_size_h, img_size_l);
-        copy_pgm_vector(img1_name, img_t1, img_size_h, img_size_l);
-
-        // Et = routine_FrameDifference_SSE2(img_t1, img_t0, img_size_h, img_size_l, diff, Et);
-
-        // sprintf(img_out_name, "img/car3_bin_FD/car_%03d.pgm", 3000+i);
-        // creation_pgm(img_out_name, img_size_h, img_size_l, maxval, Et);
+    for(i = 0; i < img_size_h; i++)	{
+    	for(j = 0; j < img_size_l; j+=16)	{
+    		display_vuint8(img_t0[i][j], " %3d ", "img_t0");
+    		printf("\n");
+    		display_vuint8(img_t1[i][j], " %3d ", "img_t1");
+    		printf("\n");
+    	}
     }
 
-    display_vuint8(img_t0[10][10], " %3d ", "img_t0");
-    printf("\n");
-    display_vuint8(img_t1[10][10], " %3d ", "img_t1");
-    printf("\n");
+    // for(i=0; i<NB_IMAGE-1; i++)
+    // {
+    //     sprintf(img0_name, "img/car3/car_%d.pgm", 3000+i);
+    //     sprintf(img1_name, "img/car3/car_%d.pgm", 3000+i+1);
+
+    //     copy_pgm_vector(img0_name, img_t0, img_size_h, img_size_l);
+    //     copy_pgm_vector(img1_name, img_t1, img_size_h, img_size_l);
+
+    //     display_vuint8(img_t0[i][32], " %3d ", "img_t0");
+    // 	printf("\n");
+    // 	display_vuint8(img_t1[i][j], " %3d ", "img_t1");
+    // 	printf("\n");
+
+    //     // Et = routine_FrameDifference_SSE2(img_t1, img_t0, img_size_h, img_size_l, diff, Et);
+
+    //     // sprintf(img_out_name, "img/car3_bin_FD/car_%03d.pgm", 3000+i);
+    //     // creation_pgm(img_out_name, img_size_h, img_size_l, maxval, Et);
+    // }
+
+    // display_vuint8(img_t0[10][11], " %3d ", "img_t0");
+    // printf("\n");
+    // display_vuint8(img_t1[10][11], " %3d ", "img_t1");
+    // printf("\n");
 
 }
 

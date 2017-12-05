@@ -309,6 +309,6 @@ void f_test_sd_SSE2()
 
 void f_test_mouvement_SSE2()	{
 
-	f_test_fd_SSE2();
-	//f_test_sd_SSE2();
+	//f_test_fd_SSE2();
+	f_test_sd_SSE2();
 }
