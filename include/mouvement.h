@@ -11,7 +11,7 @@
 #define __MOUVEMENT_H__
 
 #define NB_IMAGE 200
-#define THETA 50
+#define THETA 20
 #define N 3
 #define VMAX 40
 #define VMIN 20
