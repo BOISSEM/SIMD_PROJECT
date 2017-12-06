@@ -37,29 +37,31 @@ void dilate3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest)
     vuint8 xl, xr;
     vuint8 y;
     vuint8 dilat;
-
+    vuint8 bord_l;
     // Parcours image
     for(i = 0; i <= (size_h-1); i++)
     {
+        // bord_l = _mm_load_si128(&src[i+di][j-1]);
+        // vec_left1(vec_dup_bord_l1())
         for(j = 0; j <= (size_l-1); j++)
         {
             dilat = _mm_set1_epi8((uint8_t)0);
 
             for(di = -1; di <= 1; di++)
             {
-                    x0  = _mm_load_si128(&src[i+di][j+0]);
-                    x_1 = _mm_load_si128(&src[i+di][j-1]);
-                    x1  = _mm_load_si128(&src[i+di][j+1]);
+                x_1 = _mm_load_si128(&src[i+di][j-1]);
+                x0  = _mm_load_si128(&src[i+di][j+0]);
+                x1  = _mm_load_si128(&src[i+di][j+1]);
 
-                    xr = vec_right1(x_1, x0);
-                    xl = vec_left1(x0, x1);
+                xr = vec_right1(x_1, x0);
+                xl = vec_left1(x0, x1);
 
-                    DEBUG(display_vuint8(xr, "%3d", " xr = "));DEBUG(puts(""));
-                    DEBUG(display_vuint8(x0, "%3d", "  x0 = "));DEBUG(puts(""));
-                    DEBUG(display_vuint8(xl, "%3d", " xl = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xr, "%3d", " xr = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(x0, "%3d", " x0 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl, "%3d", " xl = "));DEBUG(puts("\n"));
 
-                    y = vec_max3(xl, x0, xr);
-                    dilat = _mm_max_epu8(dilat, y);
+                y = vec_max3(xl, x0, xr);
+                dilat = _mm_max_epu8(dilat, y);
             }
             DEBUG(display_vuint8(dilat, "%3d", " dilat = "));DEBUG(puts("\n"));
             _mm_store_si128(&dest[i][j], dilat);

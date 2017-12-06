@@ -5,7 +5,19 @@
 # Copyright (c) 2000-2007 Lionel Lacassagne
 
 # -- Lile list ----------
-FILE = main.c nrutil.c vnrutil.c mouvement.c test_mouvement.c mouvement_SSE2.c test_mouvement_SSE2.c morpho.c test_morpho.c morpho_SSE2.c test_morpho_SSE2.c morpho_SSE2_opt.c test_morpho_SSE2.c test_car3.c
+UTIL_FILE = nrutil.c vnrutil.c
+
+DETEC = mouvement.c mouvement_SSE2.c
+DETEC_TEST = test_mouvement.c test_mouvement_SSE2.c
+DETEC_BENCH =
+DETEC_FILE = $(DETEC) $(DETEC_TEST) $(DETEC_BENCH)
+
+MORPHO = morpho.c morpho_SSE2.c morpho_SSE2_opt.c
+MORPHO_TEST = test_morpho.c test_morpho_SSE2.c
+MORPHO_BENCH = bench_morpho.c bench_morpho_SSE2.c
+MORPH_FILE = $(MORPHO) $(MORPHO_TEST) $(MORPHO_BENCH)
+
+FILE = main.c $(UTIL_FILE) $(DETEC_FILE) $(MORPH_FILE) test_car3.c
 
 # -- Paths ----------
 SRC_PATH = src

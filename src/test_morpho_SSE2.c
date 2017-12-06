@@ -181,9 +181,15 @@ void f_test_open3_SSE2()
     int mi0, mi1, mj0, mj1;
     vuint8 **img1, **img2, **buffer;
 
+    // char *format     = "%6.2f ";
+    // int iter, niter = 100;
+    // int run, nrun = 100;
+    // double t0, t1, dt, tmin, t;
+    // double cycles;
+
     card = card_vuint8();
-    int l = card * 3;
-    int h = 8;
+    int l = card * 2;
+    int h = 5;
     int bord_i = 1;
     int bord_j = 0;
 
@@ -225,6 +231,10 @@ void f_test_open3_SSE2()
     // printf("Open SSE2 optimisé : \n"); open3_SSE2_opt(img1, vi1+1, vj1+1, img2, buffer);
     // printf("Open SSE2 test : \n"); open3_SSE2_test(img1, vi1+1, vj1+1, img2, buffer);
 
+    // printf("Open SSE2 : \n"); CHRONO(open3_SSE2(img1, vi1+1, vj1+1, img2, buffer),cycles);BENCH(printf(format, cycles/((si1 - si0)*(sj1 - sj0))));BENCH(puts(""));
+    // printf("Open SSE2 optimisé : \n"); open3_SSE2_opt(img1, vi1+1, vj1+1, img2, buffer);BENCH(puts(""));
+    // printf("Open SSE2 test : \n"); open3_SSE2_test(img1, vi1+1, vj1+1, img2, buffer);BENCH(puts(""));
+
     DEBUG(display_vui8matrix(buffer, vi0, vi1, vj0, vj1, "%3d", "buffer = "));
     DEBUG(display_vui8matrix(img2, vi0, vi1, vj0, vj1, "%3d", "img2 = "));
 }
@@ -239,6 +249,13 @@ void f_test_close3_SSE2()
     int vi0b, vi1b, vj0b, vj1b;
     int mi0, mi1, mj0, mj1;
     vuint8 **img1, **img2, **buffer;
+
+    char *format     = "%6.2f ";
+
+    // int iter, niter = 100;
+    // int run, nrun = 100;
+    // double t0, t1, dt, tmin, t;
+    // double cycles;
 
     card = card_vuint8();
     int l = card * 2;
@@ -284,7 +301,6 @@ void f_test_close3_SSE2()
 
     display_vui8matrix(img2, vi0, vi1, vj0, vj1, "%3d", "img2 = ");
 }
-
 
 void f_test_dilate5_SSE2()
 {

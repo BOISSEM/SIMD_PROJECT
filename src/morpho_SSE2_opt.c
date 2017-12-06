@@ -246,8 +246,16 @@ void erode3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest)
     }
 }
 
-
-void dilate3_vector_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, int i)
+/**
+ *  (SIMD) Dilatation en niveau de gris d'une ligne d'une image avec un élément structurant de taille 3x3
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image dilatee
+ *  @param  i       Numero de ligne
+ */
+inline void dilate3_vector_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, int i)
 {
     int j;
     vuint8 x_1b, x_1c;
@@ -318,7 +326,16 @@ void dilate3_vector_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest
     DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
 }
 
-void erode3_vector_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, int i)
+/**
+ *  (SIMD) Erosion en niveau de gris d'une ligne d'une image avec un élément structurant de taille 3x3
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image erodee
+ *  @param  i       Numero de ligne
+ */
+inline void erode3_vector_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, int i)
 {
     int j;
     vuint8 x_1b, x_1c;
@@ -391,6 +408,7 @@ void erode3_vector_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest,
 
 /**
  *  (SIMD) Ouverture en niveau de gris d'une image avec un élément structurant de taille 3x3
+ *  avec pipeline d'operateur
  *
  *  @param  src     Image source
  *  @param  size_h  Hauteur de l'image
@@ -412,8 +430,16 @@ void open3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8*
     dilate3_vector_SSE2_opt(buffer, size_h, size_l, dest, size_h-1);
 }
 
-
-void open3_SSE2_test(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer)
+/**
+ *  (SIMD) Ouverture en niveau de gris d'une image avec un élément structurant de taille 3x3
+ *  sans pipeline d'operateur
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image dilatee
+ */
+void open3_SSE2_opt_no_pipe(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer)
 {
     erode3_SSE2_opt(src, size_h, size_l, buffer);
     dilate3_SSE2_opt(buffer, size_h, size_l, dest);

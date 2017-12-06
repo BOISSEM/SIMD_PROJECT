@@ -11,10 +11,6 @@
 #ifndef __MORPHO_SSE2_OPT_H__
 #define __MORPHO_SSE2_OPT_H__
 
-
-void open3_SSE2_test(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer);
-
-
 /**
  *  (SIMD) Dilataion d'une image avec un élément structurant de taille 3x3
  *
@@ -37,6 +33,7 @@ void erode3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest);
 
 /**
  *  (SIMD) Ouverture en niveau de gris d'une image avec un élément structurant de taille 3x3
+ *  avec pipeline d'operateur
  *
  *  @param  src     Image source
  *  @param  size_h  Hauteur de l'image
@@ -44,5 +41,16 @@ void erode3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest);
  *  @param  dest    Image dilatee
  */
 void open3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer);
+
+/**
+ *  (SIMD) Ouverture en niveau de gris d'une image avec un élément structurant de taille 3x3
+ *  sans pipeline d'operateur
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image dilatee
+ */
+void open3_SSE2_opt_no_pipe(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer);
 
 #endif  // __MORPHO_SSE2_OPT_H__
