@@ -17,7 +17,7 @@ MORPHO_TEST = test_morpho.c test_morpho_SSE2.c
 MORPHO_BENCH = bench_morpho.c bench_morpho_SSE2.c
 MORPH_FILE = $(MORPHO) $(MORPHO_TEST) $(MORPHO_BENCH)
 
-FILE = main.c $(UTIL_FILE) $(DETEC_FILE) $(MORPH_FILE)
+FILE = main.c $(UTIL_FILE) $(DETEC_FILE) $(MORPH_FILE) test_car3.c
 
 # -- Paths ----------
 SRC_PATH = src

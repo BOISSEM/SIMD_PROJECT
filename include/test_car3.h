@@ -10,6 +10,6 @@
 #ifndef __TEST_CAR3_H__
 #define __TEST_CAR3_H__
 
-void f_test_mouvement_car3();
+void f_test_mouvement_car3(int nb_images);
 
 #endif //__CAR3_H__

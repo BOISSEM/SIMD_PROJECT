@@ -16,10 +16,10 @@ int main()
     // f_test_morpho();
     // f_test_morpho_SSE2();
 
-    // f_test_mouvement_car3();
+    f_test_mouvement_car3(198);
 
-    f_bench_morpho(1);
-    f_bench_morpho_SSE2(1);
+    // f_bench_morpho(1);
+    // f_bench_morpho_SSE2(1);
 
     return 0;
 }

@@ -783,43 +783,6 @@ void open3_SSE2_opt_no_pipe(vuint8** src, int size_h, int size_l, vuint8** dest,
 }
 
 /**
- *  (SIMD) Fermeture en niveau de gris d'une image avec un élément structurant de taille 3x3
- *
- *  @param  src     Image source
- *  @param  size_h  Hauteur de l'image
- *  @param  size_l  Largeur de l'image
- *  @param  dest    Image dilatee
- */
-void close3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer)
-{
-    int i;
-
-    for(i=0; i<2; i++){
-        erode3_vector_SSE2_opt(src, size_h, size_l, buffer, i);
-    }
-    for(i=0; i+2 < size_h; i++){
-        dilate3_vector_SSE2_opt(buffer, size_h, size_l, dest, i);
-        erode3_vector_SSE2_opt(src, size_h, size_l, buffer, i+2);
-    }
-    dilate3_vector_SSE2_opt(buffer, size_h, size_l, dest, size_h-2);
-    dilate3_vector_SSE2_opt(buffer, size_h, size_l, dest, size_h-1);
-}
-
-/**
- *  (SIMD) Fermeture en niveau de gris d'une image avec un élément structurant de taille 3x3
- *
- *  @param  src     Image source
- *  @param  size_h  Hauteur de l'image
- *  @param  size_l  Largeur de l'image
- *  @param  dest    Image dilatee
- */
-void close3_SSE2_opt_no_pipe(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer)
-{
-    dilate3_SSE2_opt(src, size_h, size_l, buffer);
-    erode3_SSE2_opt(buffer, size_h, size_l, dest);
-}
-
-/**
  *  (SIMD) Ouverture en niveau de gris d'une image avec un élément structurant de taille 5x5
  *  avec pipeline d'operateur
  *
@@ -857,4 +820,80 @@ void open5_SSE2_opt_no_pipe(vuint8** src, int size_h, int size_l, vuint8** dest,
 {
     erode5_SSE2_opt(src, size_h, size_l, buffer);
     dilate5_SSE2_opt(buffer, size_h, size_l, dest);
+}
+
+
+/**
+ *  (SIMD) Fermeture en niveau de gris d'une image avec un élément structurant de taille 3x3
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image dilatee
+ */
+void close3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer)
+{
+    int i;
+
+    for(i=0; i<2; i++){
+        dilate3_vector_SSE2_opt(src, size_h, size_l, buffer, i);
+    }
+    for(i=0; i+2 < size_h; i++){
+        erode3_vector_SSE2_opt(buffer, size_h, size_l, dest, i);
+        dilate3_vector_SSE2_opt(src, size_h, size_l, buffer, i+2);
+    }
+    erode3_vector_SSE2_opt(buffer, size_h, size_l, dest, size_h-2);
+    erode3_vector_SSE2_opt(buffer, size_h, size_l, dest, size_h-1);
+}
+
+/**
+ *  (SIMD) Fermeture en niveau de gris d'une image avec un élément structurant de taille 3x3
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image dilatee
+ */
+void close3_SSE2_opt_no_pipe(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer)
+{
+    dilate3_SSE2_opt(src, size_h, size_l, buffer);
+    erode3_SSE2_opt(buffer, size_h, size_l, dest);
+}
+
+/**
+ *  (SIMD) Fermeture en niveau de gris d'une image avec un élément structurant de taille 5x5
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image dilatee
+ */
+void close5_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer)
+{
+    int i;
+
+    for(i=0; i<3; i++){
+        dilate5_vector_SSE2_opt(src, size_h, size_l, buffer, i);
+    }
+    for(i=0; i+3 < size_h; i++){
+        erode5_vector_SSE2_opt(buffer, size_h, size_l, dest, i);
+        dilate5_vector_SSE2_opt(src, size_h, size_l, buffer, i+3);
+    }
+    erode5_vector_SSE2_opt(buffer, size_h, size_l, dest, size_h-3);
+    erode5_vector_SSE2_opt(buffer, size_h, size_l, dest, size_h-2);
+    erode5_vector_SSE2_opt(buffer, size_h, size_l, dest, size_h-1);
+}
+
+/**
+ *  (SIMD) Fermeture en niveau de gris d'une image avec un élément structurant de taille 5x5
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image dilatee
+ */
+void close5_SSE2_opt_no_pipe(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer)
+{
+    dilate5_SSE2_opt(src, size_h, size_l, buffer);
+    erode5_SSE2_opt(buffer, size_h, size_l, dest);
 }
