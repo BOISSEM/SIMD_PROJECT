@@ -26,16 +26,26 @@
     Duplication des bords :
 
     b = vec_left1(a,a) :    [ 1  2  3  4 ][ 1  2  3  4 ]
-                        --> 1 [ 2  3  4  1 ] 2  3  4
+                      --> 1 [ 2  3  4  1 ] 2  3  4
 
-    vec_right1(b, a) :      [ 2  3  4  1 ][ 1  2  3  4 ]
-                        --> 2  3  4 [ 1  1  2  3 ] 4
----------------------------------------------------------*/
-#define vec_dup_bord_l1(a) (vec_right1(vec_left1(a, a), a))
-#define vec_dup_bord_l2(a) (vec_right2(vec_left2(a, vec_dup_bord_l1(a)), a))
 
-#define vec_dup_bord_r1(a) (vec_left1(a, vec_right1(a, a)))
-#define vec_dup_bord_r2(a) (vec_left2(a, vec_right2(vec_dup_bord_r1(a), a)))
+    vec_left1(b, a) :       [ 2  3  4  1 ][ 1  2  3  4 ]
+                      --> 2 [ 3  4  1  1 ] 2  3  4
+----------------------------------------------------------*/
+#define vec_bord_g1(a)  vec_left1(a, a)
+#define vec_bord_g2(a)  vec_left1(vec_left1(a, a), a)
+
+/*--------------------------------------------------------
+    b = vec_right1(a,a) :    [ 1  2  3  4 ][ 1  2  3  4 ]
+                      -->          1  2  3 [ 4  1  2  3 ] 4
+
+
+    vec_right1(a, b) :       [ 1  2  3  4 ][ 4  1  2  3 ]
+                      -->          1  2  3 [ 4  4  1  2 ] 3
+----------------------------------------------------------*/
+#define vec_bord_d1(a)  vec_right1(a, a)
+#define vec_bord_d2(a)  vec_right1(a, vec_bord_d1(a, a)))
+
 // -------
 // calculs
 // -------

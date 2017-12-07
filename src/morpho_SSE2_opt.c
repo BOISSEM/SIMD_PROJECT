@@ -31,109 +31,72 @@
  *  @param  size_l  Largeur de l'image
  *  @param  dest    Image dilatee
  */
-void dilate_bin3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest)
-{
-    int i, j;
-    vuint8 x_1b, x_1c;
-    vuint8 x0b, x0c;
-    vuint8 x1b, x1c;
+ void dilate_bin3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest)
+ {
+     int i, j;
+     vuint8 x_1a, x_1b, x_1c;
+     vuint8 x0a, x0b, x0c;
+     vuint8 x1a, x1b, x1c;
 
-    vuint8 x_1l, x_1, x_1r;
-    vuint8 x0l, x0, x0r;
-    vuint8 x1l, x1, x1r;
+     vuint8 xa, xb, xc;
 
-    vuint8 yl, ym, yr;
-    vuint8 y;
+     vuint8 yl, yr;
+     vuint8 y;
 
-    // Parcours image
-    for(i = 0; i <= (size_h-1); i++)
-    {
-        // Gestion de bords gauche (bords côté non nécessaires)
+     // Parcours image
+     for(i = 0; i <= (size_h-1); i++)
+     {
+         x_1b = _mm_load_si128(&src[i-1][0]);
+         x0b = _mm_load_si128(&src[i][0]);
+         x1b = _mm_load_si128(&src[i+1][0]);
 
-        x_1b = _mm_load_si128(&src[i-1][0]);
-        x_1l = vec_dup_bord_l1(x_1b);
+         // Operation sur colonne (entre les lignes de vecteurs)
+         // Factorisation d'operateurs sur 1D
+         xb = vec_or3(x_1b, x0b, x1b);
+         xa = vec_bord_g1(xb);
 
-        x0b = _mm_load_si128(&src[i][0]);
-        x0l = vec_dup_bord_l1(x0b);
+         for(j = 0; j <= (size_l-1)-1; j++)
+         {
+             // Operations sur le vecteur de droite
+             x_1c = _mm_load_si128(&src[i-1][j+1]);
+             x0c = _mm_load_si128(&src[i][j+1]);
+             x1c = _mm_load_si128(&src[i+1][j+1]);
+             xc = vec_or3(x_1c, x0c, x1c);
 
-        x1b = _mm_load_si128(&src[i+1][0]);
-        x1l = vec_dup_bord_l1(x1b);
+             yl = vec_right1(xa, xb);
+             yr = vec_left1(xb, xc);
 
-        // Factorisation d'operateurs sur colonnes 1D
-        yl = vec_or3(x_1l, x0l, x1l);      // operations colonnes de gauche
-        ym = vec_or3(x_1b, x0b, x1b);      // operations colonnes du milieu
+             // Operation finale
+             y = vec_or3(yl, xb, yr);   // operations entre colonnes
+             _mm_store_si128(&dest[i][j], y);
 
-        DEBUG(printf("[%d]\n", i));
-        DEBUG(display_vuint8(x_1l, "%3d", "x_1l = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(x0l, "%3d", " x0l = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(x1l, "%3d", " x1l = "));DEBUG(puts(""));
-        DEBUG(puts("-----------------------------------------------------------"));
-        DEBUG(display_vuint8(yl, "%3d", "  yl = "));DEBUG(puts("\n"));
+             DEBUG(display_vuint8(yl, "%3d", " yl = "));DEBUG(puts(""));
+             DEBUG(display_vuint8(xb, "%3d", " xb = "));DEBUG(puts(""));
+             DEBUG(display_vuint8(yr, "%3d", " yr = "));DEBUG(puts(""));
+             DEBUG(puts("-----------------------------------------------------------"));
+             DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
 
-        DEBUG(display_vuint8(x_1b, "%3d", "x_1b = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(x0b, "%3d", " x0b = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(x1b, "%3d", " x1b = "));DEBUG(puts(""));
-        DEBUG(puts("-----------------------------------------------------------"));
-        DEBUG(display_vuint8(ym, "%3d", "  ym = "));DEBUG(puts("\n"));
+             xa = xb;
+             xb = xc;
+         }
 
-        for(j = 0; j <= (size_l-1)-1; j++)
-        {
-            x_1c = _mm_load_si128(&src[i-1][j+1]);
-            x_1r = vec_left1(x_1b, x_1c);
+         /* Prologue */
 
-            x0c = _mm_load_si128(&src[i][j+1]);
-            x0r = vec_left1(x0b, x0c);
+         // Gestion bords droits
+         xc = vec_bord_d1(xb);
+         yl = vec_right1(xa, xb);
+         yr = vec_left1(xb, xc);
 
-            x1c = _mm_load_si128(&src[i+1][j+1]);
-            x1r = vec_left1(x1b, x1c);
+         y = vec_or3(yl, xb, yr);
+         _mm_store_si128(&dest[i][j], y);
 
-            yr = vec_or3(x_1r, x0r, x1r); // operations colonnes de droite
-
-            DEBUG(printf("[%d][%d]\n", i, j));
-            DEBUG(display_vuint8(x_1r, "%3d", "x_1r = "));DEBUG(puts(""));
-            DEBUG(display_vuint8(x0r, "%3d", " x0r = "));DEBUG(puts(""));
-            DEBUG(display_vuint8(x1r, "%3d", " x1r = "));DEBUG(puts(""));
-            DEBUG(puts("-----------------------------------------------------------"));
-            DEBUG(display_vuint8(yr, "%3d", "  yr = "));DEBUG(puts("\n"));
-
-            // Operation finale
-            y = vec_or3(yl, ym, yr);   // operations entre colonnes
-            _mm_store_si128(&dest[i][j], y);
-
-            DEBUG(display_vuint8(yl, "%3d", " yl = "));DEBUG(puts(""));
-            DEBUG(display_vuint8(ym, "%3d", " ym = "));DEBUG(puts(""));
-            DEBUG(display_vuint8(yr, "%3d", " yr = "));DEBUG(puts(""));
-            DEBUG(puts("-----------------------------------------------------------"));
-            DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
-
-            x_1l = vec_right1(x_1b, x_1c);
-            x0l = vec_right1(x0b, x0c);
-            x1l = vec_right1(x1b, x1c);
-
-            yl = vec_max3(x_1l, x0l, x1l);
-            ym = vec_max3(x_1c, x0c, x1c);
-
-            x_1b = x_1c; x0b = x0c; x1b = x1c;
-        }
-
-        /* Prologue */
-
-        // Gestion bords droits
-        x_1r = vec_dup_bord_r1(x_1c);
-        x0r = vec_dup_bord_r1(x0c);
-        x1r = vec_dup_bord_r1(x1c);
-        yr = vec_max3(x_1r, x0r, x1r);
-
-        y = vec_max3(yl, ym, yr);
-        _mm_store_si128(&dest[i][j], y);
-
-        DEBUG(display_vuint8(yl, "%3d", " yl = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(ym, "%3d", " ym = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(yr, "%3d", " yr = "));DEBUG(puts(""));
-        DEBUG(puts("-----------------------------------------------------------"));
-        DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
-    }
-}
+         DEBUG(display_vuint8(yl, "%3d", " yl = "));DEBUG(puts(""));
+         DEBUG(display_vuint8(xb, "%3d", " xb = "));DEBUG(puts(""));
+         DEBUG(display_vuint8(yr, "%3d", " yr = "));DEBUG(puts(""));
+         DEBUG(puts("-----------------------------------------------------------"));
+         DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
+     }
+ }
 
 /**
  *  (SIMD) Dilataion binaire d'une image avec un élément structurant de taille 3x3
@@ -146,102 +109,153 @@ void dilate_bin3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest)
 void dilate3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest)
 {
     int i, j;
-    vuint8 x_1b, x_1c;
-    vuint8 x0b, x0c;
-    vuint8 x1b, x1c;
+    vuint8 x_1a, x_1b, x_1c;
+    vuint8 x0a, x0b, x0c;
+    vuint8 x1a, x1b, x1c;
 
-    vuint8 x_1l, x_1, x_1r;
-    vuint8 x0l, x0, x0r;
-    vuint8 x1l, x1, x1r;
+    vuint8 xa, xb, xc;
 
-    vuint8 yl, ym, yr;
+    vuint8 yl, yr;
     vuint8 y;
 
     // Parcours image
     for(i = 0; i <= (size_h-1); i++)
     {
-        // Gestion de bords gauche (bords côté non nécessaires)
-
         x_1b = _mm_load_si128(&src[i-1][0]);
-        x_1l = vec_dup_bord_l1(x_1b);
-
         x0b = _mm_load_si128(&src[i][0]);
-        x0l = vec_dup_bord_l1(x0b);
-
         x1b = _mm_load_si128(&src[i+1][0]);
-        x1l = vec_dup_bord_l1(x1b);
 
-        // Factorisation d'operateurs sur colonnes 1D
-        yl = vec_max3(x_1l, x0l, x1l);      // operations colonnes de gauche
-        ym = vec_max3(x_1b, x0b, x1b);      // operations colonnes du milieu
-
-        DEBUG(printf("[%d]\n", i));
-        DEBUG(display_vuint8(x_1l, "%3d", "x_1l = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(x0l, "%3d", " x0l = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(x1l, "%3d", " x1l = "));DEBUG(puts(""));
-        DEBUG(puts("-----------------------------------------------------------"));
-        DEBUG(display_vuint8(yl, "%3d", "  yl = "));DEBUG(puts("\n"));
-
-        DEBUG(display_vuint8(x_1b, "%3d", "x_1b = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(x0b, "%3d", " x0b = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(x1b, "%3d", " x1b = "));DEBUG(puts(""));
-        DEBUG(puts("-----------------------------------------------------------"));
-        DEBUG(display_vuint8(ym, "%3d", "  ym = "));DEBUG(puts("\n"));
+        // Operation sur colonne (entre les lignes de vecteurs)
+        // Factorisation d'operateurs sur 1D
+        xb = vec_max3(x_1b, x0b, x1b);
+        xa = vec_bord_g1(xb);
 
         for(j = 0; j <= (size_l-1)-1; j++)
         {
+            // Operations sur le vecteur de droite
             x_1c = _mm_load_si128(&src[i-1][j+1]);
-            x_1r = vec_left1(x_1b, x_1c);
-
             x0c = _mm_load_si128(&src[i][j+1]);
-            x0r = vec_left1(x0b, x0c);
-
             x1c = _mm_load_si128(&src[i+1][j+1]);
-            x1r = vec_left1(x1b, x1c);
+            xc = vec_max3(x_1c, x0c, x1c);
 
-            yr = vec_max3(x_1r, x0r, x1r); // operations colonnes de droite
-
-            DEBUG(printf("[%d][%d]\n", i, j));
-            DEBUG(display_vuint8(x_1r, "%3d", "x_1r = "));DEBUG(puts(""));
-            DEBUG(display_vuint8(x0r, "%3d", " x0r = "));DEBUG(puts(""));
-            DEBUG(display_vuint8(x1r, "%3d", " x1r = "));DEBUG(puts(""));
-            DEBUG(puts("-----------------------------------------------------------"));
-            DEBUG(display_vuint8(yr, "%3d", "  yr = "));DEBUG(puts("\n"));
+            yl = vec_right1(xa, xb);
+            yr = vec_left1(xb, xc);
 
             // Operation finale
-            y = vec_max3(yl, ym, yr);   // operations entre colonnes
+            y = vec_max3(yl, xb, yr);   // operations entre colonnes
             _mm_store_si128(&dest[i][j], y);
 
             DEBUG(display_vuint8(yl, "%3d", " yl = "));DEBUG(puts(""));
-            DEBUG(display_vuint8(ym, "%3d", " ym = "));DEBUG(puts(""));
+            DEBUG(display_vuint8(xb, "%3d", " xb = "));DEBUG(puts(""));
             DEBUG(display_vuint8(yr, "%3d", " yr = "));DEBUG(puts(""));
             DEBUG(puts("-----------------------------------------------------------"));
             DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
 
-            x_1l = vec_right1(x_1b, x_1c);
-            x0l = vec_right1(x0b, x0c);
-            x1l = vec_right1(x1b, x1c);
-
-            yl = vec_max3(x_1l, x0l, x1l);
-            ym = vec_max3(x_1c, x0c, x1c);
-
-            x_1b = x_1c; x0b = x0c; x1b = x1c;
+            xa = xb;
+            xb = xc;
         }
 
         /* Prologue */
 
         // Gestion bords droits
-        x_1r = vec_dup_bord_r1(x_1c);
-        x0r = vec_dup_bord_r1(x0c);
-        x1r = vec_dup_bord_r1(x1c);
-        yr = vec_max3(x_1r, x0r, x1r);
+        xc = vec_bord_d1(xb);
+        yl = vec_right1(xa, xb);
+        yr = vec_left1(xb, xc);
 
-        y = vec_max3(yl, ym, yr);
+        y = vec_max3(yl, xb, yr);
         _mm_store_si128(&dest[i][j], y);
 
         DEBUG(display_vuint8(yl, "%3d", " yl = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(ym, "%3d", " ym = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(xb, "%3d", " xb = "));DEBUG(puts(""));
         DEBUG(display_vuint8(yr, "%3d", " yr = "));DEBUG(puts(""));
+        DEBUG(puts("-----------------------------------------------------------"));
+        DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
+    }
+}
+
+/**
+ *  (SIMD) Dilataion binaire d'une image avec un élément structurant de taille 5x5
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image dilatee
+ */
+void dilate5_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest)
+{
+    int i, j;
+    vuint8 x_2a, x_2b, x_2c;
+    vuint8 x_1a, x_1b, x_1c;
+    vuint8 x0a, x0b, x0c;
+    vuint8 x1a, x1b, x1c;
+    vuint8 x2a, x2b, x2c;
+
+    vuint8 xa, xb, xc;
+
+    vuint8 yl2, yl1, yr1, yr2;
+    vuint8 y;
+
+    // Parcours image
+    for(i = 0; i <= (size_h-1); i++)
+    {
+        x_2b = _mm_load_si128(&src[i-2][0]);
+        x_1b = _mm_load_si128(&src[i-1][0]);
+        x0b = _mm_load_si128(&src[i][0]);
+        x1b = _mm_load_si128(&src[i+1][0]);
+        x2b = _mm_load_si128(&src[i+2][0]);
+
+        // Operation sur colonne (entre les lignes de vecteurs)
+        // Factorisation d'operateurs sur 1D
+        xb = vec_max5(x_2b, x_1b, x0b, x1b, x2b);
+        xa = vec_bord_g2(xb);
+
+        for(j = 0; j <= (size_l-1)-1; j++)
+        {
+            // Operations sur le vecteur de droite
+            x_2c = _mm_load_si128(&src[i-2][j+1]);
+            x_1c = _mm_load_si128(&src[i-1][j+1]);
+            x0c = _mm_load_si128(&src[i][j+1]);
+            x1c = _mm_load_si128(&src[i+1][j+1]);
+            x2c = _mm_load_si128(&src[i+2][j+1]);
+            xc = vec_max5(x_2c, x_1c, x0c, x1c, x2c);
+
+            yl2 = vec_right2(xa, xb);
+            yl1 = vec_right1(xa, xb);
+            yr1 = vec_left1(xb, xc);
+            yr2 = vec_left2(xb, xc);
+
+            // Operation finale
+            y = vec_max5(yl2, yl1, xb, yr1, yr2);   // operations entre colonnes
+            _mm_store_si128(&dest[i][j], y);
+
+            DEBUG(display_vuint8(yl2, "%3d", " yl2 = "));DEBUG(puts(""));
+            DEBUG(display_vuint8(yl1, "%3d", " yl1 = "));DEBUG(puts(""));
+            DEBUG(display_vuint8(xb, "%3d", "  xb = "));DEBUG(puts(""));
+            DEBUG(display_vuint8(yr1, "%3d", " yr1 = "));DEBUG(puts(""));
+            DEBUG(display_vuint8(yr2, "%3d", " yr2 = "));DEBUG(puts(""));
+            DEBUG(puts("-----------------------------------------------------------"));
+            DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
+
+            xa = xb;
+            xb = xc;
+        }
+
+        /* Prologue */
+
+        // Gestion bords droits
+        yl2 = vec_right2(xa, xb);
+        yl1 = vec_right1(xa, xb);
+        yr1 = vec_left1(xb, xc);
+        yr2 = vec_left2(xb, xc);
+
+        y = vec_max5(yl2, yl1, xb, yr1, yr2);   // operations entre colonnes
+        _mm_store_si128(&dest[i][j], y);
+
+        DEBUG(display_vuint8(yl2, "%3d", " yl2 = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yl1, "%3d", " yl1 = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(xb, "%3d", "  xb = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yr1, "%3d", " yr1 = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yr2, "%3d", " yr2 = "));DEBUG(puts(""));
         DEBUG(puts("-----------------------------------------------------------"));
         DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
     }
@@ -258,102 +272,153 @@ void dilate3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest)
 void erode3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest)
 {
     int i, j;
-    vuint8  x_1b, x_1c;
-    vuint8  x0b, x0c;
-    vuint8  x1b, x1c;
+    vuint8 x_1a, x_1b, x_1c;
+    vuint8 x0a, x0b, x0c;
+    vuint8 x1a, x1b, x1c;
 
-    vuint8 x_1l, x_1, x_1r;
-    vuint8 x0l, x0, x0r;
-    vuint8 x1l, x1, x1r;
+    vuint8 xa, xb, xc;
 
-    vuint8 yl, ym, yr;
+    vuint8 yl, yr;
     vuint8 y;
 
     // Parcours image
     for(i = 0; i <= (size_h-1); i++)
     {
-        // Gestion de bords gauche (bords côté non nécessaires)
-
         x_1b = _mm_load_si128(&src[i-1][0]);
-        x_1l = vec_dup_bord_l1(x_1b);
-
         x0b = _mm_load_si128(&src[i][0]);
-        x0l = vec_dup_bord_l1(x0b);
-
         x1b = _mm_load_si128(&src[i+1][0]);
-        x1l = vec_dup_bord_l1(x1b);
 
-        // Factorisation d'operateurs sur colonnes 1D
-        yl = vec_min3(x_1l, x0l, x1l);
-        ym = vec_min3(x_1b, x0b, x1b);
-
-        DEBUG(printf("[%d]\n", i));
-        DEBUG(display_vuint8(x_1l, "%3d", "x_1l = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(x0l, "%3d", " x0l = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(x1l, "%3d", " x1l = "));DEBUG(puts(""));
-        DEBUG(puts("-----------------------------------------------------------"));
-        DEBUG(display_vuint8(yl, "%3d", "  yl = "));DEBUG(puts("\n"));
-
-        DEBUG(display_vuint8(x_1b, "%3d", "x_1b = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(x0b, "%3d", " x0b = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(x1b, "%3d", " x1b = "));DEBUG(puts(""));
-        DEBUG(puts("-----------------------------------------------------------"));
-        DEBUG(display_vuint8(ym, "%3d", "  ym = "));DEBUG(puts("\n"));
+        // Operation sur colonne (entre les lignes de vecteurs)
+        // Factorisation d'operateurs sur 1D
+        xb = vec_min3(x_1b, x0b, x1b);
+        xa = vec_bord_g1(xb);
 
         for(j = 0; j <= (size_l-1)-1; j++)
         {
+            // Operations sur le vecteur de droite
             x_1c = _mm_load_si128(&src[i-1][j+1]);
-            x_1r = vec_left1(x_1b, x_1c);
-
             x0c = _mm_load_si128(&src[i][j+1]);
-            x0r = vec_left1(x0b, x0c);
-
             x1c = _mm_load_si128(&src[i+1][j+1]);
-            x1r = vec_left1(x1b, x1c);
+            xc = vec_min3(x_1c, x0c, x1c);
 
-            yr = vec_min3(x_1r, x0r, x1r);
-
-            DEBUG(printf("[%d][%d]\n", i, j));
-            DEBUG(display_vuint8(x_1r, "%3d", "x_1r = "));DEBUG(puts(""));
-            DEBUG(display_vuint8(x0r, "%3d", " x0r = "));DEBUG(puts(""));
-            DEBUG(display_vuint8(x1r, "%3d", " x1r = "));DEBUG(puts(""));
-            DEBUG(puts("-----------------------------------------------------------"));
-            DEBUG(display_vuint8(yr, "%3d", "  yr = "));DEBUG(puts("\n"));
+            yl = vec_right1(xa, xb);
+            yr = vec_left1(xb, xc);
 
             // Operation finale
-            y = vec_min3(yl, ym, yr);
+            y = vec_min3(yl, xb, yr);   // operations entre colonnes
             _mm_store_si128(&dest[i][j], y);
 
             DEBUG(display_vuint8(yl, "%3d", " yl = "));DEBUG(puts(""));
-            DEBUG(display_vuint8(ym, "%3d", " ym = "));DEBUG(puts(""));
+            DEBUG(display_vuint8(xb, "%3d", " xb = "));DEBUG(puts(""));
             DEBUG(display_vuint8(yr, "%3d", " yr = "));DEBUG(puts(""));
             DEBUG(puts("-----------------------------------------------------------"));
             DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
 
-            x_1l = vec_right1(x_1b, x_1c);
-            x0l = vec_right1(x0b, x0c);
-            x1l = vec_right1(x1b, x1c);
-
-            yl = vec_min3(x_1l, x0l, x1l);
-            ym = vec_min3(x_1c, x0c, x1c);
-
-            x_1b = x_1c; x0b = x0c; x1b = x1c;
+            xa = xb;
+            xb = xc;
         }
 
         /* Prologue */
 
         // Gestion bords droits
-        x_1r = vec_dup_bord_r1(x_1c);
-        x0r = vec_dup_bord_r1(x0c);
-        x1r = vec_dup_bord_r1(x1c);
-        yr = vec_min3(x_1r, x0r, x1r);
+        xc = vec_bord_d1(xb);
+        yl = vec_right1(xa, xb);
+        yr = vec_left1(xb, xc);
 
-        y = vec_min3(yl, ym, yr);
+        y = vec_min3(yl, xb, yr);
         _mm_store_si128(&dest[i][j], y);
 
         DEBUG(display_vuint8(yl, "%3d", " yl = "));DEBUG(puts(""));
-        DEBUG(display_vuint8(ym, "%3d", " ym = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(xb, "%3d", " xb = "));DEBUG(puts(""));
         DEBUG(display_vuint8(yr, "%3d", " yr = "));DEBUG(puts(""));
+        DEBUG(puts("-----------------------------------------------------------"));
+        DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
+    }
+}
+
+/**
+ *  (SIMD) Erosion en niveau de gris d'une image avec un élément structurant de taille 5x5
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image erodee
+ */
+void erode5_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest)
+{
+    int i, j;
+    vuint8 x_2a, x_2b, x_2c;
+    vuint8 x_1a, x_1b, x_1c;
+    vuint8 x0a, x0b, x0c;
+    vuint8 x1a, x1b, x1c;
+    vuint8 x2a, x2b, x2c;
+
+    vuint8 xa, xb, xc;
+
+    vuint8 yl2, yl1, yr1, yr2;
+    vuint8 y;
+
+    // Parcours image
+    for(i = 0; i <= (size_h-1); i++)
+    {
+        x_2b = _mm_load_si128(&src[i-2][0]);
+        x_1b = _mm_load_si128(&src[i-1][0]);
+        x0b = _mm_load_si128(&src[i][0]);
+        x1b = _mm_load_si128(&src[i+1][0]);
+        x2b = _mm_load_si128(&src[i+2][0]);
+
+        // Operation sur colonne (entre les lignes de vecteurs)
+        // Factorisation d'operateurs sur 1D
+        xb = vec_min5(x_2b, x_1b, x0b, x1b, x2b);
+        xa = vec_bord_g2(xb);
+
+        for(j = 0; j <= (size_l-1)-1; j++)
+        {
+            // Operations sur le vecteur de droite
+            x_2c = _mm_load_si128(&src[i-2][j+1]);
+            x_1c = _mm_load_si128(&src[i-1][j+1]);
+            x0c = _mm_load_si128(&src[i][j+1]);
+            x1c = _mm_load_si128(&src[i+1][j+1]);
+            x2c = _mm_load_si128(&src[i+2][j+1]);
+            xc = vec_min5(x_2c, x_1c, x0c, x1c, x2c);
+
+            yl2 = vec_right2(xa, xb);
+            yl1 = vec_right1(xa, xb);
+            yr1 = vec_left1(xb, xc);
+            yr2 = vec_left2(xb, xc);
+
+            // Operation finale
+            y = vec_min5(yl2, yl1, xb, yr1, yr2);   // operations entre colonnes
+            _mm_store_si128(&dest[i][j], y);
+
+            DEBUG(display_vuint8(yl2, "%3d", " yl2 = "));DEBUG(puts(""));
+            DEBUG(display_vuint8(yl1, "%3d", " yl1 = "));DEBUG(puts(""));
+            DEBUG(display_vuint8(xb, "%3d", "  xb = "));DEBUG(puts(""));
+            DEBUG(display_vuint8(yr1, "%3d", " yr1 = "));DEBUG(puts(""));
+            DEBUG(display_vuint8(yr2, "%3d", " yr2 = "));DEBUG(puts(""));
+            DEBUG(puts("-----------------------------------------------------------"));
+            DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
+
+            xa = xb;
+            xb = xc;
+        }
+
+        /* Prologue */
+
+        // Gestion bords droits
+        yl2 = vec_right2(xa, xb);
+        yl1 = vec_right1(xa, xb);
+        yr1 = vec_left1(xb, xc);
+        yr2 = vec_left2(xb, xc);
+
+        y = vec_min5(yl2, yl1, xb, yr1, yr2);   // operations entre colonnes
+        _mm_store_si128(&dest[i][j], y);
+
+        DEBUG(display_vuint8(yl2, "%3d", " yl2 = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yl1, "%3d", " yl1 = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(xb, "%3d", "  xb = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yr1, "%3d", " yr1 = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yr2, "%3d", " yr2 = "));DEBUG(puts(""));
         DEBUG(puts("-----------------------------------------------------------"));
         DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
     }
@@ -371,71 +436,150 @@ void erode3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest)
 inline void dilate3_vector_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, int i)
 {
     int j;
-    vuint8 x_1b, x_1c;
-    vuint8 x0b, x0c;
-    vuint8 x1b, x1c;
+    vuint8 x_1a, x_1b, x_1c;
+    vuint8 x0a, x0b, x0c;
+    vuint8 x1a, x1b, x1c;
 
-    vuint8 x_1l, x_1, x_1r;
-    vuint8 x0l, x0, x0r;
-    vuint8 x1l, x1, x1r;
+    vuint8 xa, xb, xc;
 
-    vuint8 yl, ym, yr;
+    vuint8 yl, yr;
     vuint8 y;
 
-    // Gestion de bords gauche (bords côté non nécessaires)
+    // Parcours image
     x_1b = _mm_load_si128(&src[i-1][0]);
-    x_1l = vec_dup_bord_l1(x_1b);
-
     x0b = _mm_load_si128(&src[i][0]);
-    x0l = vec_dup_bord_l1(x0b);
-
     x1b = _mm_load_si128(&src[i+1][0]);
-    x1l = vec_dup_bord_l1(x1b);
 
-    // Factorisation d'operateurs sur colonnes 1D
-    yl = vec_max3(x_1l, x0l, x1l);
-    ym = vec_max3(x_1b, x0b, x1b);
+    // Operation sur colonne (entre les lignes de vecteurs)
+    // Factorisation d'operateurs sur 1D
+    xb = vec_max3(x_1b, x0b, x1b);
+    xa = vec_bord_g1(xb);
 
     for(j = 0; j <= (size_l-1)-1; j++)
     {
-        // SHIFT-MERGE avec le vecteur de droite
+        // Operations sur le vecteur de droite
         x_1c = _mm_load_si128(&src[i-1][j+1]);
-        x_1r = vec_left1(x_1b, x_1c);
-
         x0c = _mm_load_si128(&src[i][j+1]);
-        x0r = vec_left1(x0b, x0c);
-
         x1c = _mm_load_si128(&src[i+1][j+1]);
-        x1r = vec_left1(x1b, x1c);
+        xc = vec_max3(x_1c, x0c, x1c);
 
-        yr = vec_max3(x_1r, x0r, x1r);
+        yl = vec_right1(xa, xb);
+        yr = vec_left1(xb, xc);
 
         // Operation finale
-        y = vec_max3(yl, ym, yr);
+        y = vec_max3(yl, xb, yr);   // operations entre colonnes
         _mm_store_si128(&dest[i][j], y);
 
-        DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yl, "%3d", " yl = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(xb, "%3d", " xb = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yr, "%3d", " yr = "));DEBUG(puts(""));
+        DEBUG(puts("-----------------------------------------------------------"));
+        DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
 
-        x_1l = vec_right1(x_1b, x_1c);
-        x0l = vec_right1(x0b, x0c);
-        x1l = vec_right1(x1b, x1c);
-
-        yl = vec_max3(x_1l, x0l, x1l);
-        ym = vec_max3(x_1c, x0c, x1c);
-
-        x_1b = x_1c; x0b = x0c; x1b = x1c;
+        xa = xb;
+        xb = xc;
     }
 
     /* Prologue */
-    // Gestion bords droits
-    x_1r = vec_dup_bord_r1(x_1c);
-    x0r = vec_dup_bord_r1(x0c);
-    x1r = vec_dup_bord_r1(x1c);
-    yr = vec_max3(x_1r, x0r, x1r);
 
-    y = vec_max3(yl, ym, yr);
+    // Gestion bords droits
+    xc = vec_bord_d1(xb);
+    yl = vec_right1(xa, xb);
+    yr = vec_left1(xb, xc);
+
+    y = vec_max3(yl, xb, yr);
     _mm_store_si128(&dest[i][j], y);
 
+    DEBUG(display_vuint8(yl, "%3d", " yl = "));DEBUG(puts(""));
+    DEBUG(display_vuint8(xb, "%3d", " xb = "));DEBUG(puts(""));
+    DEBUG(display_vuint8(yr, "%3d", " yr = "));DEBUG(puts(""));
+    DEBUG(puts("-----------------------------------------------------------"));
+    DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
+}
+
+/**
+ *  (SIMD) Dilatation en niveau de gris d'une ligne d'une image avec un élément structurant de taille 5x5
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image dilatee
+ *  @param  i       Numero de ligne
+ */
+inline void dilate5_vector_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, int i)
+{
+    int j;
+    vuint8 x_2a, x_2b, x_2c;
+    vuint8 x_1a, x_1b, x_1c;
+    vuint8 x0a, x0b, x0c;
+    vuint8 x1a, x1b, x1c;
+    vuint8 x2a, x2b, x2c;
+
+    vuint8 xa, xb, xc;
+
+    vuint8 yl2, yl1, yr1, yr2;
+    vuint8 y;
+
+    // Parcours image
+    x_2b = _mm_load_si128(&src[i-2][0]);
+    x_1b = _mm_load_si128(&src[i-1][0]);
+    x0b = _mm_load_si128(&src[i][0]);
+    x1b = _mm_load_si128(&src[i+1][0]);
+    x2b = _mm_load_si128(&src[i+2][0]);
+
+    // Operation sur colonne (entre les lignes de vecteurs)
+    // Factorisation d'operateurs sur 1D
+    xb = vec_max5(x_2b, x_1b, x0b, x1b, x2b);
+    xa = vec_bord_g2(xb);
+
+    for(j = 0; j <= (size_l-1)-1; j++)
+    {
+        // Operations sur le vecteur de droite
+        x_2c = _mm_load_si128(&src[i-2][j+1]);
+        x_1c = _mm_load_si128(&src[i-1][j+1]);
+        x0c = _mm_load_si128(&src[i][j+1]);
+        x1c = _mm_load_si128(&src[i+1][j+1]);
+        x2c = _mm_load_si128(&src[i+2][j+1]);
+        xc = vec_max5(x_2c, x_1c, x0c, x1c, x2c);
+
+        yl2 = vec_right2(xa, xb);
+        yl1 = vec_right1(xa, xb);
+        yr1 = vec_left1(xb, xc);
+        yr2 = vec_left2(xb, xc);
+
+        // Operation finale
+        y = vec_max5(yl2, yl1, xb, yr1, yr2);   // operations entre colonnes
+        _mm_store_si128(&dest[i][j], y);
+
+        DEBUG(display_vuint8(yl2, "%3d", " yl2 = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yl1, "%3d", " yl1 = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(xb, "%3d", "  xb = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yr1, "%3d", " yr1 = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yr2, "%3d", " yr2 = "));DEBUG(puts(""));
+        DEBUG(puts("-----------------------------------------------------------"));
+        DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
+
+        xa = xb;
+        xb = xc;
+    }
+
+    /* Prologue */
+
+    // Gestion bords droits
+    yl2 = vec_right2(xa, xb);
+    yl1 = vec_right1(xa, xb);
+    yr1 = vec_left1(xb, xc);
+    yr2 = vec_left2(xb, xc);
+
+    y = vec_max5(yl2, yl1, xb, yr1, yr2);   // operations entre colonnes
+    _mm_store_si128(&dest[i][j], y);
+
+    DEBUG(display_vuint8(yl2, "%3d", " yl2 = "));DEBUG(puts(""));
+    DEBUG(display_vuint8(yl1, "%3d", " yl1 = "));DEBUG(puts(""));
+    DEBUG(display_vuint8(xb, "%3d", "  xb = "));DEBUG(puts(""));
+    DEBUG(display_vuint8(yr1, "%3d", " yr1 = "));DEBUG(puts(""));
+    DEBUG(display_vuint8(yr2, "%3d", " yr2 = "));DEBUG(puts(""));
+    DEBUG(puts("-----------------------------------------------------------"));
     DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
 }
 
@@ -451,71 +595,151 @@ inline void dilate3_vector_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8
 inline void erode3_vector_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, int i)
 {
     int j;
-    vuint8 x_1b, x_1c;
-    vuint8 x0b, x0c;
-    vuint8 x1b, x1c;
+    vuint8 x_1a, x_1b, x_1c;
+    vuint8 x0a, x0b, x0c;
+    vuint8 x1a, x1b, x1c;
 
-    vuint8 x_1l, x_1, x_1r;
-    vuint8 x0l, x0, x0r;
-    vuint8 x1l, x1, x1r;
+    vuint8 xa, xb, xc;
 
-    vuint8 yl, ym, yr;
+    vuint8 yl, yr;
     vuint8 y;
 
-    // Gestion de bords gauche (bords côté non nécessaires)
+    // Parcours image
     x_1b = _mm_load_si128(&src[i-1][0]);
-    x_1l = vec_dup_bord_l1(x_1b);
-
     x0b = _mm_load_si128(&src[i][0]);
-    x0l = vec_dup_bord_l1(x0b);
-
     x1b = _mm_load_si128(&src[i+1][0]);
-    x1l = vec_dup_bord_l1(x1b);
 
-    // Factorisation d'operateurs sur colonnes 1D
-    yl = vec_min3(x_1l, x0l, x1l);
-    ym = vec_min3(x_1b, x0b, x1b);
+    // Operation sur colonne (entre les lignes de vecteurs)
+    // Factorisation d'operateurs sur 1D
+    xb = vec_min3(x_1b, x0b, x1b);
+    xa = vec_bord_g1(xb);
 
     for(j = 0; j <= (size_l-1)-1; j++)
     {
-        // SHIFT-MERGE avec le vecteur de droite
+        // Operations sur le vecteur de droite
         x_1c = _mm_load_si128(&src[i-1][j+1]);
-        x_1r = vec_left1(x_1b, x_1c);
-
         x0c = _mm_load_si128(&src[i][j+1]);
-        x0r = vec_left1(x0b, x0c);
-
         x1c = _mm_load_si128(&src[i+1][j+1]);
-        x1r = vec_left1(x1b, x1c);
+        xc = vec_min3(x_1c, x0c, x1c);
 
-        yr = vec_min3(x_1r, x0r, x1r);
+        yl = vec_right1(xa, xb);
+        yr = vec_left1(xb, xc);
 
         // Operation finale
-        y = vec_min3(yl, ym, yr);
+        y = vec_min3(yl, xb, yr);   // operations entre colonnes
         _mm_store_si128(&dest[i][j], y);
 
-        DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yl, "%3d", " yl = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(xb, "%3d", " xb = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yr, "%3d", " yr = "));DEBUG(puts(""));
+        DEBUG(puts("-----------------------------------------------------------"));
+        DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
 
-        x_1l = vec_right1(x_1b, x_1c);
-        x0l = vec_right1(x0b, x0c);
-        x1l = vec_right1(x1b, x1c);
-
-        yl = vec_min3(x_1l, x0l, x1l);
-        ym = vec_min3(x_1c, x0c, x1c);
-
-        x_1b = x_1c; x0b = x0c; x1b = x1c;
+        xa = xb;
+        xb = xc;
     }
 
     /* Prologue */
-    // Gestion bords droits
-    x_1r = vec_dup_bord_r1(x_1c);
-    x0r = vec_dup_bord_r1(x0c);
-    x1r = vec_dup_bord_r1(x1c);
-    yr = vec_min3(x_1r, x0r, x1r);
 
-    y = vec_min3(yl, ym, yr);
+    // Gestion bords droits
+    xc = vec_bord_d1(xb);
+    yl = vec_right1(xa, xb);
+    yr = vec_left1(xb, xc);
+
+    y = vec_min3(yl, xb, yr);
     _mm_store_si128(&dest[i][j], y);
 
+    DEBUG(display_vuint8(yl, "%3d", " yl = "));DEBUG(puts(""));
+    DEBUG(display_vuint8(xb, "%3d", " xb = "));DEBUG(puts(""));
+    DEBUG(display_vuint8(yr, "%3d", " yr = "));DEBUG(puts(""));
+    DEBUG(puts("-----------------------------------------------------------"));
+    DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
+}
+
+
+/**
+ *  (SIMD) Erosion en niveau de gris d'une ligne d'une image avec un élément structurant de taille 5x5
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image erodee
+ *  @param  i       Numero de ligne
+ */
+inline void erode5_vector_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, int i)
+{
+    int j;
+    vuint8 x_2a, x_2b, x_2c;
+    vuint8 x_1a, x_1b, x_1c;
+    vuint8 x0a, x0b, x0c;
+    vuint8 x1a, x1b, x1c;
+    vuint8 x2a, x2b, x2c;
+
+    vuint8 xa, xb, xc;
+
+    vuint8 yl2, yl1, yr1, yr2;
+    vuint8 y;
+
+    // Parcours image
+    x_2b = _mm_load_si128(&src[i-2][0]);
+    x_1b = _mm_load_si128(&src[i-1][0]);
+    x0b = _mm_load_si128(&src[i][0]);
+    x1b = _mm_load_si128(&src[i+1][0]);
+    x2b = _mm_load_si128(&src[i+2][0]);
+
+    // Operation sur colonne (entre les lignes de vecteurs)
+    // Factorisation d'operateurs sur 1D
+    xb = vec_min5(x_2b, x_1b, x0b, x1b, x2b);
+    xa = vec_bord_g2(xb);
+
+    for(j = 0; j <= (size_l-1)-1; j++)
+    {
+        // Operations sur le vecteur de droite
+        x_2c = _mm_load_si128(&src[i-2][j+1]);
+        x_1c = _mm_load_si128(&src[i-1][j+1]);
+        x0c = _mm_load_si128(&src[i][j+1]);
+        x1c = _mm_load_si128(&src[i+1][j+1]);
+        x2c = _mm_load_si128(&src[i+2][j+1]);
+        xc = vec_min5(x_2c, x_1c, x0c, x1c, x2c);
+
+        yl2 = vec_right2(xa, xb);
+        yl1 = vec_right1(xa, xb);
+        yr1 = vec_left1(xb, xc);
+        yr2 = vec_left2(xb, xc);
+
+        // Operation finale
+        y = vec_min5(yl2, yl1, xb, yr1, yr2);   // operations entre colonnes
+        _mm_store_si128(&dest[i][j], y);
+
+        DEBUG(display_vuint8(yl2, "%3d", " yl2 = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yl1, "%3d", " yl1 = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(xb, "%3d", "  xb = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yr1, "%3d", " yr1 = "));DEBUG(puts(""));
+        DEBUG(display_vuint8(yr2, "%3d", " yr2 = "));DEBUG(puts(""));
+        DEBUG(puts("-----------------------------------------------------------"));
+        DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
+
+        xa = xb;
+        xb = xc;
+    }
+
+    /* Prologue */
+
+    // Gestion bords droits
+    yl2 = vec_right2(xa, xb);
+    yl1 = vec_right1(xa, xb);
+    yr1 = vec_left1(xb, xc);
+    yr2 = vec_left2(xb, xc);
+
+    y = vec_min5(yl2, yl1, xb, yr1, yr2);   // operations entre colonnes
+    _mm_store_si128(&dest[i][j], y);
+
+    DEBUG(display_vuint8(yl2, "%3d", " yl2 = "));DEBUG(puts(""));
+    DEBUG(display_vuint8(yl1, "%3d", " yl1 = "));DEBUG(puts(""));
+    DEBUG(display_vuint8(xb, "%3d", "  xb = "));DEBUG(puts(""));
+    DEBUG(display_vuint8(yr1, "%3d", " yr1 = "));DEBUG(puts(""));
+    DEBUG(display_vuint8(yr2, "%3d", " yr2 = "));DEBUG(puts(""));
+    DEBUG(puts("-----------------------------------------------------------"));
     DEBUG(display_vuint8(y, "%3d", "  y = "));DEBUG(puts("\n"));
 }
 
@@ -579,4 +803,58 @@ void close3_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8
     }
     dilate3_vector_SSE2_opt(buffer, size_h, size_l, dest, size_h-2);
     dilate3_vector_SSE2_opt(buffer, size_h, size_l, dest, size_h-1);
+}
+
+/**
+ *  (SIMD) Fermeture en niveau de gris d'une image avec un élément structurant de taille 3x3
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image dilatee
+ */
+void close3_SSE2_opt_no_pipe(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer)
+{
+    dilate3_SSE2_opt(src, size_h, size_l, buffer);
+    erode3_SSE2_opt(buffer, size_h, size_l, dest);
+}
+
+/**
+ *  (SIMD) Ouverture en niveau de gris d'une image avec un élément structurant de taille 5x5
+ *  avec pipeline d'operateur
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image dilatee
+ */
+void open5_SSE2_opt(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer)
+{
+    int i;
+
+    for(i=0; i<3; i++){
+        erode5_vector_SSE2_opt(src, size_h, size_l, buffer, i);
+    }
+    for(i=0; i+3 < size_h; i++){
+        dilate5_vector_SSE2_opt(buffer, size_h, size_l, dest, i);
+        erode5_vector_SSE2_opt(src, size_h, size_l, buffer, i+3);
+    }
+    dilate5_vector_SSE2_opt(buffer, size_h, size_l, dest, size_h-3);
+    dilate5_vector_SSE2_opt(buffer, size_h, size_l, dest, size_h-2);
+    dilate5_vector_SSE2_opt(buffer, size_h, size_l, dest, size_h-1);
+}
+
+/**
+ *  (SIMD) Ouverture en niveau de gris d'une image avec un élément structurant de taille 5x5
+ *  avec pipeline d'operateur
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image dilatee
+ */
+void open5_SSE2_opt_no_pipe(vuint8** src, int size_h, int size_l, vuint8** dest, vuint8** buffer)
+{
+    erode5_SSE2_opt(src, size_h, size_l, buffer);
+    dilate5_SSE2_opt(buffer, size_h, size_l, dest);
 }

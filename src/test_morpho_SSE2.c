@@ -75,8 +75,8 @@ void f_test_dilate3_SSE2()
     vuint8 **img1, **img2;
 
     card = card_vuint8();
-    int l = card * 2;
-    int h = 5;
+    int l = card * 3;
+    int h = 4;
     int bord_i = 1;
     int bord_j = 0;
 
@@ -110,8 +110,8 @@ void f_test_dilate3_SSE2()
     DEBUG(display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = "));
 
 
-    printf("Dilate SSE2 : \n"); dilate3_SSE2(img1, vi1+1, vj1+1, img2);
-    // printf("Dilate SSE2 optimisé : \n"); dilate3_SSE2_opt(img1, vi1+1, vj1+1, img2);
+    // printf("Dilate SSE2 : \n"); dilate3_SSE2(img1, vi1+1, vj1+1, img2);
+    printf("Dilate SSE2 optimisé : \n"); dilate3_SSE2_opt(img1, vi1+1, vj1+1, img2);
 
     DEBUG(display_vui8matrix(img2, vi0, vi1, vj0, vj1, "%3d", "img2 = "));
 
@@ -188,8 +188,8 @@ void f_test_open3_SSE2()
     // double cycles;
 
     card = card_vuint8();
-    int l = card * 2;
-    int h = 5;
+    int l = card * 3;
+    int h = 8;
     int bord_i = 1;
     int bord_j = 0;
 
@@ -227,13 +227,9 @@ void f_test_open3_SSE2()
     DEBUG(display_vui8matrix(img1, vi0b, vi1b, vj0b, vj1b, "%3d", "img1 (+bords) = "));
     DEBUG(display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = "));
 
-    printf("Open SSE2 : \n"); open3_SSE2(img1, vi1+1, vj1+1, img2, buffer);
+    // printf("Open SSE2 : \n"); open3_SSE2(img1, vi1+1, vj1+1, img2, buffer);
     // printf("Open SSE2 optimisé : \n"); open3_SSE2_opt(img1, vi1+1, vj1+1, img2, buffer);
-    // printf("Open SSE2 test : \n"); open3_SSE2_test(img1, vi1+1, vj1+1, img2, buffer);
-
-    // printf("Open SSE2 : \n"); CHRONO(open3_SSE2(img1, vi1+1, vj1+1, img2, buffer),cycles);BENCH(printf(format, cycles/((si1 - si0)*(sj1 - sj0))));BENCH(puts(""));
-    // printf("Open SSE2 optimisé : \n"); open3_SSE2_opt(img1, vi1+1, vj1+1, img2, buffer);BENCH(puts(""));
-    // printf("Open SSE2 test : \n"); open3_SSE2_test(img1, vi1+1, vj1+1, img2, buffer);BENCH(puts(""));
+    printf("Open SSE2 No pipe : \n"); open3_SSE2_opt_no_pipe(img1, vi1+1, vj1+1, img2, buffer);
 
     DEBUG(display_vui8matrix(buffer, vi0, vi1, vj0, vj1, "%3d", "buffer = "));
     DEBUG(display_vui8matrix(img2, vi0, vi1, vj0, vj1, "%3d", "img2 = "));
@@ -349,8 +345,8 @@ void f_test_dilate5_SSE2()
     DEBUG(display_vui8matrix(img1, vi0, vi1, vj0, vj1, "%3d", "img1 = "));
 
 
-    printf("Dilate5 SSE2 : \n"); dilate5_SSE2(img1, vi1+1, vj1+1, img2);
-    // printf("Dilate5 SSE2 optimisé : \n"); dilate5_SSE2_opt(img1, vi1+1, vj1+1, img2);
+    // printf("Dilate5 SSE2 : \n"); dilate5_SSE2(img1, vi1+1, vj1+1, img2);
+    printf("Dilate5 SSE2 optimisé : \n"); dilate5_SSE2_opt(img1, vi1+1, vj1+1, img2);
 
     display_vui8matrix(img2, vi0, vi1, vj0, vj1, "%3d", "img2 = ");
 }
@@ -526,9 +522,9 @@ void f_test_morpho_SSE2()
     // f_test_macro();
 
     /* Tests 3x3 */
-    f_test_dilate3_SSE2();
+    // f_test_dilate3_SSE2();
     // f_test_erode3_SSE2();
-    // f_test_open3_SSE2();
+    f_test_open3_SSE2();
     // f_test_close3_SSE2();
 
     /* Tests 5x5 */
