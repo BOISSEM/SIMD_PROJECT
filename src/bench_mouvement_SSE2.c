@@ -1,12 +1,12 @@
 /* -----------------------------------------------
-	test_car3_SSE2.c
-	Edité par Martin Boisse
-	Le 26 Novembre 2018
+    bench_mouvement_SSE2.c
+    Edité par Martin Boisse
+    Le 6 Decembre 2018
 
-	Projet SIMD
-	test detection de mouvement sur image
-	(verification des fonctions presente dans
-	mouvement.c)
+    Projet SIMD
+    Benchmark des tests de detection de mouvement sur image
+    (verification des fonctions presente dans
+    mouvement_SSE2.c)
 ----------------------------------------------- */
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +16,6 @@
 #include "nrutil.h"
 #include "vnrutil.h"
 #include "mouvement_SSE2.h"
-#include "morpho_SSE2.h"
 #include "debug_macro.h"
 
 #define NB_IMAGE    200
@@ -24,7 +23,7 @@
 
 char buffer[200];
 
-void f_test_fd_car3_SSE2()	{
+void f_bench_fd_SSE2()  {
 
 	int i;
     int img_size_h = 0, img_size_l = 0;
@@ -34,12 +33,14 @@ void f_test_fd_car3_SSE2()	{
     char img1_name[30];
     char img_out_name[60];
 
+    // Variables benchmark
     char *format_f32= "%4.0f ";
     char *format    = "%6.2f ";
     int iter, niter = 10;
     int run, nrun = 20;
     double t0, t1, dt, tmin, t;
     double cycles;
+    double moyenne = 0;
 
     /*------------ Declaration tableau de vecteur ---------- */
     vuint8 **img_t0;
@@ -55,6 +56,14 @@ void f_test_fd_car3_SSE2()	{
 
     uint8 **v_Ot;
     uint8 **v_Et;
+    /*------------------------------------------------------ */
+
+    /*--------- Conversion indice scalaire-vectoriel ------- */
+    int card;
+    int nrl, nrh, ncl, nch;
+    int vnrl, vnrh, vncl, vnch;
+
+    card = card_vuint8();
     /*------------------------------------------------------ */
     
 
@@ -94,6 +103,10 @@ void f_test_fd_car3_SSE2()	{
     v_Et = (uint8**) Et;
     /*-------------------------------------------------------------------------------------------*/
 
+    /*---------------------------- Conversion indice scalaire à vectoriel -----------------------*/
+    s2v(0, img_size_h-1, 0, img_size_l-1, card, &vnrl, &vnrh, &vncl, &vnch);
+    /*-------------------------------------------------------------------------------------------*/
+
     /*----------------------------------------- FD ----------------------------------------------*/
     for(i = 0; i < NB_IMAGE-1; i++)	{
     	sprintf(img0_name, "img/car3/car_%d.pgm", 3000+i);
@@ -102,19 +115,22 @@ void f_test_fd_car3_SSE2()	{
 		MLoadPGM_ui8matrix(img0_name, 0, img_size_h-1, 0, img_size_l-1, v_img_t0);
 		MLoadPGM_ui8matrix(img1_name, 0, img_size_h-1, 0, img_size_l-1, v_img_t1);
 
-		
-		BENCH(printf("Frame Difference : "));
-		CHRONO(routine_FrameDifference_SSE2(img_t1, img_t0, img_size_h, img_size_l/16, Ot, Et), cycles);BENCH(printf(format, cycles/((img_size_h+1-img_size_l)*(img_size_h+1-img_size_l)))); BENCH(puts(""));
+        //BENCH(printf("Frame Difference : "));
+        CHRONO(routine_FrameDifference_SSE2(img_t1, img_t0, vnrh, vnch, Ot, Et), cycles);
+        //BENCH(printf(format, cycles/((img_size_h+1-img_size_l)*(img_size_h+1-img_size_l))));
+        //BENCH(puts(""));
+        moyenne+= cycles/((img_size_h+1-img_size_l)*(img_size_h+1-img_size_l));
 
 
 		sprintf(img_out_name, "img/car3_bin_FD_SSE2/car_%03d.pgm", 3000+i);
 		SavePGM_ui8matrix(v_Et, 0, img_size_h-1, 0, img_size_l-1, img_out_name);
     }
     /*-------------------------------------------------------------------------------------------*/
+    printf("Moyenne des Cycle Par Point Frame Difference SIMD: %f\n", moyenne/i);
 }
 
 
-void f_test_sd_car3_SSE2()	{
+void f_bench_sd_SSE2()	{
 	int i;
 
 	int img_size_h = 0;
@@ -124,12 +140,14 @@ void f_test_sd_car3_SSE2()	{
 	char img1_name[30];
 	char img_out_name[60];
 
+    // Variables benchmark
 	char *format_f32= "%4.0f ";
     char *format    = "%6.2f ";
     int iter, niter = 10;
     int run, nrun = 20;
     double t0, t1, dt, tmin, t;
     double cycles;
+    double moyenne = 0;
 
 	/*------------ Declaration tableau de vecteur ---------- */
     vuint8 **img_t1;
@@ -147,6 +165,14 @@ void f_test_sd_car3_SSE2()	{
     uint8 **v_Et;
     uint8 **v_M;
     uint8 **v_V;
+    /*------------------------------------------------------ */
+
+    /*--------- Conversion indice scalaire-vectoriel ------- */
+    int card;
+    int nrl, nrh, ncl, nch;
+    int vnrl, vnrh, vncl, vnch;
+
+    card = card_vuint8();
     /*------------------------------------------------------ */
 
     /* Recuperation de la taille des images en ouvrant la premiere image */
@@ -187,6 +213,10 @@ void f_test_sd_car3_SSE2()	{
     v_Et = (uint8**) Et;
     /*-------------------------------------------------------------------------------------------*/
 
+    /*---------------------------- Conversion indice scalaire à vectoriel -----------------------*/
+    s2v(0, img_size_h-1, 0, img_size_l-1, card, &vnrl, &vnrh, &vncl, &vnch);
+    /*-------------------------------------------------------------------------------------------*/
+
     /*-------------------------------------- STEP0 ----------------------------------------------*/
     sprintf(img1_name, "img/car3/car_%d.pgm", 3000);
     MLoadPGM_ui8matrix(img1_name, 0, img_size_h-1, 0, img_size_l-1, v_img_t1);
@@ -200,27 +230,20 @@ void f_test_sd_car3_SSE2()	{
 
 		MLoadPGM_ui8matrix(img1_name, 0, img_size_h-1, 0, img_size_l-1, v_img_t1);
 
-        SigmaDelta_1step_SSE2(img_t1, Ot, img_size_h, img_size_l, M, V, Et);
+        //BENCH(printf("Sigma Delta SSE2 : "));
+        CHRONO(SigmaDelta_1step_SSE2(img_t1, Ot, vnrh, vnch, M, V, Et), cycles);
+        //BENCH(printf(format, cycles/((img_size_h+1-img_size_l)*(img_size_h+1-img_size_l))));
+        //BENCH(puts(""));
+        moyenne+= cycles/((img_size_h+1-img_size_l)*(img_size_h+1-img_size_l));
 
 		sprintf(img_out_name, "img/car3_bin_SD_SSE2/car_%03d.pgm", 3000+i);
 		SavePGM_ui8matrix(v_Et, 0, img_size_h-1, 0, img_size_l-1, img_out_name);
     }
     /*-------------------------------------------------------------------------------------------*/
+    printf("Moyenne des Cycle Par Point Sigma Delta SIMD: %f\n", moyenne/i);
 }
 
-void f_test_fd_morpho_car3_SSE2()	{
-
+void f_bench_mouvement_SSE2()   {
+    f_bench_fd_SSE2();
+    f_bench_sd_SSE2();
 }
-
-void f_test_sd_morpho_car3_SSE2()	{
-
-}
-
-
-void f_test_mouvement_car3_SSE2()	{
-	//f_test_fd_car3_SSE2();
-	f_test_sd_car3_SSE2();
-	//f_test_fd_morpho_car3_SSE2();
-	//f_test_sd_morpho_car3_SSE2();
-}
-
