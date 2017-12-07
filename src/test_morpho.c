@@ -18,8 +18,12 @@
 #include "nrdef.h"
 #include "nrutil.h"
 
+#include "debug_macro.h"
+
 #define SIZE_TAB    8
 #define BORD_TAB    2
+
+uint8_t* ptr_buff[100];
 
 /**
  *  Test fonctions de dilatation binaire
@@ -37,6 +41,8 @@ void f_test_dilate_bin()
     uint8_t** img3_o;
     uint8_t** img4_o;
 
+    // Tableau de pointeur pour permettre de désallouer les tableaux avec bord
+
     /*------ Allocation image test ------*/
     img1 = ui8matrix(0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     img2 = ui8matrix(0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
@@ -49,7 +55,7 @@ void f_test_dilate_bin()
     img4_o = ui8matrix(0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
 
     /*----- Initialisation image test -----*/
-    for(i=-BORD_TAB; i<=SIZE_TAB-1+BORD_TAB; i++)
+    for(i=0; i<=(SIZE_TAB-1); i++)
     {
         for(j=-BORD_TAB; j<=SIZE_TAB-1+BORD_TAB; j++)
         {
@@ -64,20 +70,59 @@ void f_test_dilate_bin()
         }
     }
 
+    /* Bords haut et bas */
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Sauvegarde des pointeurs des bords pour la désallocation */
+        ptr_buff[16*j+0] = img1[i];
+        ptr_buff[16*j+1] = img2[i];
+        ptr_buff[16*j+2] = img3[i];
+        ptr_buff[16*j+3] = img4[i];
+        ptr_buff[16*j+4] = img1_o[i];
+        ptr_buff[16*j+5] = img2_o[i];
+        ptr_buff[16*j+6] = img3_o[i];
+        ptr_buff[16*j+7] = img4_o[i];
+
+        img1[i] = img1[0];
+        img2[i] = img2[0];
+        img3[i] = img3[0];
+        img4[i] = img4[0];
+        img1_o[i] = img1_o[0];
+        img2_o[i] = img2_o[0];
+        img3_o[i] = img3_o[0];
+        img4_o[i] = img4_o[0];
+
+        ptr_buff[16*j+8] = img1[SIZE_TAB-1 - i];
+        ptr_buff[16*j+9] = img2[SIZE_TAB-1 - i];
+        ptr_buff[16*j+10] = img3[SIZE_TAB-1 - i];
+        ptr_buff[16*j+11] = img4[SIZE_TAB-1 - i];
+        ptr_buff[16*j+12] = img1_o[SIZE_TAB-1 - i];
+        ptr_buff[16*j+13] = img2_o[SIZE_TAB-1 - i];
+        ptr_buff[16*j+14] = img3_o[SIZE_TAB-1 - i];
+        ptr_buff[16*j+15] = img4_o[SIZE_TAB-1 - i];
+
+        img1[SIZE_TAB-1 - i] = img1[SIZE_TAB-1];
+        img2[SIZE_TAB-1 - i] = img2[SIZE_TAB-1];
+        img3[SIZE_TAB-1 - i] = img3[SIZE_TAB-1];
+        img4[SIZE_TAB-1 - i] = img4[SIZE_TAB-1];
+        img1_o[SIZE_TAB-1 - i] = img1_o[SIZE_TAB-1];
+        img2_o[SIZE_TAB-1 - i] = img2_o[SIZE_TAB-1];
+        img3_o[SIZE_TAB-1 - i] = img3_o[SIZE_TAB-1];
+        img4_o[SIZE_TAB-1 - i] = img4_o[SIZE_TAB-1];
+        j++;
+    }
+
     /*------ Test fonctions ------*/
     //============= TEST 1 - Dilataion binaire 3 ===============
     img1[3][3] = 1;
 
-    display_ui8matrix(img1, -BORD_TAB, SIZE_TAB-1+BORD_TAB, -BORD_TAB, SIZE_TAB-1+BORD_TAB," %d ","Tableau 1");
-    printf("\n======================\n");
+    DEBUG(display_ui8matrix(img1, -BORD_TAB, SIZE_TAB-1+BORD_TAB, -BORD_TAB, SIZE_TAB-1+BORD_TAB," %d ","Tableau 1"));
+    DEBUG(printf("\n======================\n"));
 
     dilate_bin3(img1, SIZE_TAB, SIZE_TAB, img1_o);
 
-    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1");
-    printf("\n");
-
-    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Dilatation Binaire 3");
-    printf("\n");
+    DEBUG(display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1")); DEBUG(printf("\n"));
+    DEBUG(display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Dilatation Binaire 3")); DEBUG(printf("\n"));
 
 
     //============= TEST 2 - Dilataion binaire 3 ===============
@@ -87,22 +132,16 @@ void f_test_dilate_bin()
 
     dilate_bin3(img2, SIZE_TAB, SIZE_TAB, img2_o);
 
-    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2");
-    printf("\n");
-
-    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2 - Dilatation Binaire 3");
-    printf("\n");
+    DEBUG(display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2")); DEBUG(printf("\n"));
+    DEBUG(display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2 - Dilatation Binaire 3")); DEBUG(printf("\n"));
 
     //============= TEST 3 - Dilataion binaire 5 ===============
     img3[3][3] = 1;
 
     dilate_bin5(img3, SIZE_TAB, SIZE_TAB, img3_o);
 
-    display_ui8matrix(img3, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3");
-    printf("\n");
-
-    display_ui8matrix(img3_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3 - Dilatation Binaire 5");
-    printf("\n");
+    DEBUG(display_ui8matrix(img3, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3")); DEBUG(printf("\n"));
+    DEBUG(display_ui8matrix(img3_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3 - Dilatation Binaire 5")); DEBUG(printf("\n"));
 
     //============= TEST 4 - Dilataion binaire 5 ===============
     img4[0][1] = 1;
@@ -110,13 +149,33 @@ void f_test_dilate_bin()
 
     dilate_bin5(img4, SIZE_TAB, SIZE_TAB, img4_o);
 
-    display_ui8matrix(img4, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 4");
-    printf("\n");
-
-    display_ui8matrix(img4_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 4 - Dilatation Binaire 5");
-    printf("\n");
+    DEBUG(display_ui8matrix(img4, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 4")); DEBUG(printf("\n"));
+    DEBUG(display_ui8matrix(img4_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 4 - Dilatation Binaire 5")); DEBUG(printf("\n"));
 
     //============ DESALLOCATION MEMOIRE =============
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Reaffectation des pointeurs des bords pour la désallocation */
+        img1[i] = ptr_buff[16*j+0];
+        img2[i] = ptr_buff[16*j+1];
+        img3[i] = ptr_buff[16*j+2];
+        img4[i] = ptr_buff[16*j+3];
+        img1_o[i] = ptr_buff[16*j+4];
+        img2_o[i] = ptr_buff[16*j+5];
+        img3_o[i] = ptr_buff[16*j+6];
+        img4_o[i] = ptr_buff[16*j+7];
+
+        img1[SIZE_TAB-1 - i] = ptr_buff[16*j+8];
+        img2[SIZE_TAB-1 - i] = ptr_buff[16*j+9];
+        img3[SIZE_TAB-1 - i] = ptr_buff[16*j+10];
+        img4[SIZE_TAB-1 - i] = ptr_buff[16*j+11];
+        img1_o[SIZE_TAB-1 - i] = ptr_buff[16*j+12];
+        img2_o[SIZE_TAB-1 - i] = ptr_buff[16*j+13];
+        img3_o[SIZE_TAB-1 - i] = ptr_buff[16*j+14];
+        img4_o[SIZE_TAB-1 - i] = ptr_buff[16*j+15];
+        j++;
+    }
+
     free_ui8matrix(img1, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img2, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img3, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
@@ -134,6 +193,7 @@ void f_test_dilate_bin()
 void f_test_erode_bin()
 {
     int i, j;
+    int i0, i1;
     uint8_t** img1;
     uint8_t** img2;
     uint8_t** img3;
@@ -156,7 +216,7 @@ void f_test_erode_bin()
     img4_o = ui8matrix(0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
 
     /*----- Initialisation image test -----*/
-    for(i=-BORD_TAB; i<=SIZE_TAB-1+BORD_TAB; i++)
+    for(i=0; i<=(SIZE_TAB-1); i++)
     {
         for(j=-BORD_TAB; j<=SIZE_TAB-1+BORD_TAB; j++)
         {
@@ -171,6 +231,49 @@ void f_test_erode_bin()
         }
     }
 
+    /* Bords haut et bas */
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Sauvegarde des pointeurs des bords pour la désallocation */
+        ptr_buff[16*j+0] = img1[i];
+        ptr_buff[16*j+1] = img2[i];
+        ptr_buff[16*j+2] = img3[i];
+        ptr_buff[16*j+3] = img4[i];
+        ptr_buff[16*j+4] = img1_o[i];
+        ptr_buff[16*j+5] = img2_o[i];
+        ptr_buff[16*j+6] = img3_o[i];
+        ptr_buff[16*j+7] = img4_o[i];
+
+        img1[i] = img1[0];
+        img2[i] = img2[0];
+        img3[i] = img3[0];
+        img4[i] = img4[0];
+        img1_o[i] = img1_o[0];
+        img2_o[i] = img2_o[0];
+        img3_o[i] = img3_o[0];
+        img4_o[i] = img4_o[0];
+
+        ptr_buff[16*j+8] = img1[SIZE_TAB-1 - i];
+        ptr_buff[16*j+9] = img2[SIZE_TAB-1 - i];
+        ptr_buff[16*j+10] = img3[SIZE_TAB-1 - i];
+        ptr_buff[16*j+11] = img4[SIZE_TAB-1 - i];
+        ptr_buff[16*j+12] = img1_o[SIZE_TAB-1 - i];
+        ptr_buff[16*j+13] = img2_o[SIZE_TAB-1 - i];
+        ptr_buff[16*j+14] = img3_o[SIZE_TAB-1 - i];
+        ptr_buff[16*j+15] = img4_o[SIZE_TAB-1 - i];
+
+        img1[SIZE_TAB-1 - i] = img1[SIZE_TAB-1];
+        img2[SIZE_TAB-1 - i] = img2[SIZE_TAB-1];
+        img3[SIZE_TAB-1 - i] = img3[SIZE_TAB-1];
+        img4[SIZE_TAB-1 - i] = img4[SIZE_TAB-1];
+        img1_o[SIZE_TAB-1 - i] = img1_o[SIZE_TAB-1];
+        img2_o[SIZE_TAB-1 - i] = img2_o[SIZE_TAB-1];
+        img3_o[SIZE_TAB-1 - i] = img3_o[SIZE_TAB-1];
+        img4_o[SIZE_TAB-1 - i] = img4_o[SIZE_TAB-1];
+        j++;
+    }
+
+
     /*------ Test fonctions ------*/
     //============= TEST 1 - Erosion binaire 3 ===============
     img1[2][2] = 1; img1[2][3] = 1; img1[2][4] = 1;
@@ -183,11 +286,9 @@ void f_test_erode_bin()
 
     erode_bin3(img1, SIZE_TAB, SIZE_TAB, img1_o);
 
-    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1");
-    printf("\n");
+    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1"); printf("\n");
 
-    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Erosion Binaire 3");
-    printf("\n");
+    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Erosion Binaire 3"); printf("\n");
 
 
     //============= TEST 2 - Erosion binaire 3 ===============
@@ -205,11 +306,9 @@ void f_test_erode_bin()
 
     erode_bin3(img2, SIZE_TAB, SIZE_TAB, img2_o);
 
-    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2");
-    printf("\n");
+    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2"); printf("\n");
 
-    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2 - Erosion Binaire 3");
-    printf("\n");
+    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2 - Erosion Binaire 3"); printf("\n");
 
     //============= TEST 3 - Dilataion binaire 5 ===============
     for(i=0; i<=SIZE_TAB-1; i++)
@@ -222,11 +321,10 @@ void f_test_erode_bin()
 
     erode_bin5(img3, SIZE_TAB, SIZE_TAB, img3_o);
 
-    display_ui8matrix(img3, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3");
-    printf("\n");
+    display_ui8matrix(img3, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3"); printf("\n");
+    // display_ui8matrix(img3, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB," %d ","Tableau 3"); printf("\n");
 
-    display_ui8matrix(img3_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3 - Erosion Binaire 5");
-    printf("\n");
+    display_ui8matrix(img3_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3 - Erosion Binaire 5"); printf("\n");
 
     //============= TEST 4 - Dilataion binaire 5 ===============
     for(i=0; i<=SIZE_TAB-1; i++)
@@ -242,14 +340,35 @@ void f_test_erode_bin()
 
     erode_bin5(img4, SIZE_TAB, SIZE_TAB, img4_o);
 
-    display_ui8matrix(img4, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 4");
-    printf("\n");
+    display_ui8matrix(img4, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 4"); printf("\n");
 
-    display_ui8matrix(img4_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 4 - Erosion Binaire 5");
-    printf("\n");
+    display_ui8matrix(img4_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 4 - Erosion Binaire 5"); printf("\n");
 
 
     //============ DESALLOCATION MEMOIRE =============
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Reaffectation des pointeurs des bords pour la désallocation */
+        img1[i] = ptr_buff[16*j+0];
+        img2[i] = ptr_buff[16*j+1];
+        img3[i] = ptr_buff[16*j+2];
+        img4[i] = ptr_buff[16*j+3];
+        img1_o[i] = ptr_buff[16*j+4];
+        img2_o[i] = ptr_buff[16*j+5];
+        img3_o[i] = ptr_buff[16*j+6];
+        img4_o[i] = ptr_buff[16*j+7];
+
+        img1[SIZE_TAB-1 - i] = ptr_buff[16*j+8];
+        img2[SIZE_TAB-1 - i] = ptr_buff[16*j+9];
+        img3[SIZE_TAB-1 - i] = ptr_buff[16*j+10];
+        img4[SIZE_TAB-1 - i] = ptr_buff[16*j+11];
+        img1_o[SIZE_TAB-1 - i] = ptr_buff[16*j+12];
+        img2_o[SIZE_TAB-1 - i] = ptr_buff[16*j+13];
+        img3_o[SIZE_TAB-1 - i] = ptr_buff[16*j+14];
+        img4_o[SIZE_TAB-1 - i] = ptr_buff[16*j+15];
+        j++;
+    }
+
     free_ui8matrix(img1, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img2, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img3, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
@@ -299,7 +418,7 @@ void f_test_open_bin()
     img4_o = ui8matrix(0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
 
     /*----- Initialisation image test -----*/
-    for(i=-BORD_TAB; i<=SIZE_TAB-1+BORD_TAB; i++)
+    for(i=0; i<=(SIZE_TAB-1); i++)
     {
         for(j=-BORD_TAB; j<=SIZE_TAB-1+BORD_TAB; j++)
         {
@@ -318,6 +437,65 @@ void f_test_open_bin()
         }
     }
 
+    /* Bords haut et bas */
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Sauvegarde des pointeurs des bords pour la désallocation */
+        ptr_buff[23*j+0] = img1[i];
+        ptr_buff[23*j+1] = img2[i];
+        ptr_buff[23*j+2] = img3[i];
+        ptr_buff[23*j+3] = img4[i];
+        ptr_buff[23*j+4] = img1_buf[i];
+        ptr_buff[23*j+5] = img2_buf[i];
+        ptr_buff[23*j+6] = img3_buf[i];
+        ptr_buff[23*j+7] = img4_buf[i];
+        ptr_buff[23*j+8] = img1_o[i];
+        ptr_buff[23*j+9] = img2_o[i];
+        ptr_buff[23*j+10] = img3_o[i];
+        ptr_buff[23*j+11] = img4_o[i];
+
+        img1[i] = img1[0];
+        img2[i] = img2[0];
+        img3[i] = img3[0];
+        img4[i] = img4[0];
+        img1_buf[i] = img1_buf[0];
+        img2_buf[i] = img2_buf[0];
+        img3_buf[i] = img3_buf[0];
+        img4_buf[i] = img4_buf[0];
+        img1_o[i] = img1_o[0];
+        img2_o[i] = img2_o[0];
+        img3_o[i] = img3_o[0];
+        img4_o[i] = img4_o[0];
+
+        ptr_buff[23*j+12] = img1[SIZE_TAB-1 - i];
+        ptr_buff[23*j+13] = img2[SIZE_TAB-1 - i];
+        ptr_buff[23*j+14] = img3[SIZE_TAB-1 - i];
+        ptr_buff[23*j+15] = img4[SIZE_TAB-1 - i];
+        ptr_buff[23*j+16] = img1_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+17] = img2_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+18] = img3_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+19] = img4_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+20] = img1_o[SIZE_TAB-1 - i];
+        ptr_buff[23*j+21] = img2_o[SIZE_TAB-1 - i];
+        ptr_buff[23*j+22] = img3_o[SIZE_TAB-1 - i];
+        ptr_buff[23*j+23] = img4_o[SIZE_TAB-1 - i];
+
+        img1[SIZE_TAB-1 - i] = img1[SIZE_TAB-1];
+        img2[SIZE_TAB-1 - i] = img2[SIZE_TAB-1];
+        img3[SIZE_TAB-1 - i] = img3[SIZE_TAB-1];
+        img4[SIZE_TAB-1 - i] = img4[SIZE_TAB-1];
+        img1_buf[SIZE_TAB-1 - i] = img1_buf[SIZE_TAB-1];
+        img2_buf[SIZE_TAB-1 - i] = img2_buf[SIZE_TAB-1];
+        img3_buf[SIZE_TAB-1 - i] = img3_buf[SIZE_TAB-1];
+        img4_buf[SIZE_TAB-1 - i] = img4_buf[SIZE_TAB-1];
+        img1_o[SIZE_TAB-1 - i] = img1_o[SIZE_TAB-1];
+        img2_o[SIZE_TAB-1 - i] = img2_o[SIZE_TAB-1];
+        img3_o[SIZE_TAB-1 - i] = img3_o[SIZE_TAB-1];
+        img4_o[SIZE_TAB-1 - i] = img4_o[SIZE_TAB-1];
+        j++;
+    }
+
+
     /*------ Test fonctions ------*/
     //============= TEST 1 - Ouverture binaire 3 ===============
     img1[0][0] = 0; img1[0][1] = 0; img1[0][2] = 1; img1[0][3] = 1; img1[0][4] = 1; img1[0][5] = 1; img1[0][6] = 0; img2[0][7] = 0;
@@ -334,14 +512,11 @@ void f_test_open_bin()
 
     open_bin3(img1, SIZE_TAB, SIZE_TAB, img1_o, img1_buf);
 
-    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1");
-    printf("\n");
+    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1"); printf("\n");
 
-    display_ui8matrix(img1_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Temporaire (Erosion)");
-    printf("\n");
+    display_ui8matrix(img1_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Temporaire (Erosion)"); printf("\n");
 
-    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Ouverture Binaire 3 (Erosion + Dilatation)");
-    printf("\n");
+    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Ouverture Binaire 3 (Erosion + Dilatation)"); printf("\n");
 
     //============= TEST 1 - Ouverture binaire 5 ===============
     img2[0][0] = 1; img2[0][1] = 1; img2[0][2] = 1; img2[0][3] = 1; img2[0][4] = 1; img2[0][5] = 1; img2[0][6] = 1; img2[0][7] = 0;
@@ -357,16 +532,45 @@ void f_test_open_bin()
 
     open_bin5(img2, SIZE_TAB, SIZE_TAB, img2_o, img2_buf);
 
-    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2");
-    printf("\n");
+    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2"); printf("\n");
 
-    display_ui8matrix(img2_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2 - Temporaire (Erosion)");
-    printf("\n");
+    display_ui8matrix(img2_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2 - Temporaire (Erosion)"); printf("\n");
 
-    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2 - Ouverture Binaire 5 (Erosion + Dilatation)");
-    printf("\n");
+    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2 - Ouverture Binaire 5 (Erosion + Dilatation)"); printf("\n");
 
     //============ DESALLOCATION MEMOIRE =============
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Reaffectation des pointeurs des bords pour la désallocation */
+        img1[i] = ptr_buff[23*j+0];
+        img2[i] = ptr_buff[23*j+1];
+        img3[i] = ptr_buff[23*j+2];
+        img4[i] = ptr_buff[23*j+3];
+        img1_buf[i] = ptr_buff[23*j+4];
+        img2_buf[i] = ptr_buff[23*j+5];
+        img3_buf[i] = ptr_buff[23*j+6];
+        img4_buf[i] = ptr_buff[23*j+7];
+        img1_o[i] = ptr_buff[23*j+8];
+        img2_o[i] = ptr_buff[23*j+9];
+        img3_o[i] = ptr_buff[23*j+10];
+        img4_o[i] = ptr_buff[23*j+11];
+
+        img1[SIZE_TAB-1 - i] = ptr_buff[23*j+12];
+        img2[SIZE_TAB-1 - i] = ptr_buff[23*j+13];
+        img3[SIZE_TAB-1 - i] = ptr_buff[23*j+14];
+        img4[SIZE_TAB-1 - i] = ptr_buff[23*j+15];
+        img1_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+16];
+        img2_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+17];
+        img3_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+18];
+        img4_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+19];
+        img1_o[SIZE_TAB-1 - i] = ptr_buff[23*j+20];
+        img2_o[SIZE_TAB-1 - i] = ptr_buff[23*j+21];
+        img3_o[SIZE_TAB-1 - i] = ptr_buff[23*j+22];
+        img4_o[SIZE_TAB-1 - i] = ptr_buff[23*j+23];
+
+        j++;
+    }
+
     free_ui8matrix(img1, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img2, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img3, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
@@ -422,7 +626,7 @@ void f_test_close_bin()
     img4_o = ui8matrix(0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
 
     /*----- Initialisation image test -----*/
-    for(i=-BORD_TAB; i<=SIZE_TAB-1+BORD_TAB; i++)
+    for(i=0; i<=(SIZE_TAB-1); i++)
     {
         for(j=-BORD_TAB; j<=SIZE_TAB-1+BORD_TAB; j++)
         {
@@ -441,6 +645,64 @@ void f_test_close_bin()
         }
     }
 
+    /* Bords haut et bas */
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Sauvegarde des pointeurs des bords pour la désallocation */
+        ptr_buff[23*j+0] = img1[i];
+        ptr_buff[23*j+1] = img2[i];
+        ptr_buff[23*j+2] = img3[i];
+        ptr_buff[23*j+3] = img4[i];
+        ptr_buff[23*j+4] = img1_buf[i];
+        ptr_buff[23*j+5] = img2_buf[i];
+        ptr_buff[23*j+6] = img3_buf[i];
+        ptr_buff[23*j+7] = img4_buf[i];
+        ptr_buff[23*j+8] = img1_o[i];
+        ptr_buff[23*j+9] = img2_o[i];
+        ptr_buff[23*j+10] = img3_o[i];
+        ptr_buff[23*j+11] = img4_o[i];
+
+        img1[i] = img1[0];
+        img2[i] = img2[0];
+        img3[i] = img3[0];
+        img4[i] = img4[0];
+        img1_buf[i] = img1_buf[0];
+        img2_buf[i] = img2_buf[0];
+        img3_buf[i] = img3_buf[0];
+        img4_buf[i] = img4_buf[0];
+        img1_o[i] = img1_o[0];
+        img2_o[i] = img2_o[0];
+        img3_o[i] = img3_o[0];
+        img4_o[i] = img4_o[0];
+
+        ptr_buff[23*j+12] = img1[SIZE_TAB-1 - i];
+        ptr_buff[23*j+13] = img2[SIZE_TAB-1 - i];
+        ptr_buff[23*j+14] = img3[SIZE_TAB-1 - i];
+        ptr_buff[23*j+15] = img4[SIZE_TAB-1 - i];
+        ptr_buff[23*j+16] = img1_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+17] = img2_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+18] = img3_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+19] = img4_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+20] = img1_o[SIZE_TAB-1 - i];
+        ptr_buff[23*j+21] = img2_o[SIZE_TAB-1 - i];
+        ptr_buff[23*j+22] = img3_o[SIZE_TAB-1 - i];
+        ptr_buff[23*j+23] = img4_o[SIZE_TAB-1 - i];
+
+        img1[SIZE_TAB-1 - i] = img1[SIZE_TAB-1];
+        img2[SIZE_TAB-1 - i] = img2[SIZE_TAB-1];
+        img3[SIZE_TAB-1 - i] = img3[SIZE_TAB-1];
+        img4[SIZE_TAB-1 - i] = img4[SIZE_TAB-1];
+        img1_buf[SIZE_TAB-1 - i] = img1_buf[SIZE_TAB-1];
+        img2_buf[SIZE_TAB-1 - i] = img2_buf[SIZE_TAB-1];
+        img3_buf[SIZE_TAB-1 - i] = img3_buf[SIZE_TAB-1];
+        img4_buf[SIZE_TAB-1 - i] = img4_buf[SIZE_TAB-1];
+        img1_o[SIZE_TAB-1 - i] = img1_o[SIZE_TAB-1];
+        img2_o[SIZE_TAB-1 - i] = img2_o[SIZE_TAB-1];
+        img3_o[SIZE_TAB-1 - i] = img3_o[SIZE_TAB-1];
+        img4_o[SIZE_TAB-1 - i] = img4_o[SIZE_TAB-1];
+        j++;
+    }
+
     /*------ Test fonctions ------*/
     //============= TEST 1 - Ouverture binaire 3 ===============
     img1[0][0] = 0; img1[0][1] = 0; img1[0][2] = 0; img1[0][3] = 0; img1[0][4] = 0; img1[0][5] = 0; img1[0][6] = 0; img1[0][7] = 0;
@@ -457,14 +719,11 @@ void f_test_close_bin()
 
     close_bin3(img1, SIZE_TAB, SIZE_TAB, img1_o, img1_buf);
 
-    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1");
-    printf("\n");
+    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1"); printf("\n");
 
-    display_ui8matrix(img1_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Temporaire (Dilatation)");
-    printf("\n");
+    display_ui8matrix(img1_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Temporaire (Dilatation)"); printf("\n");
 
-    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Fermeture Binaire 3 (Dilatation + Erosion)");
-    printf("\n");
+    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Fermeture Binaire 3 (Dilatation + Erosion)"); printf("\n");
 
     /*------ Test fonctions ------*/
     //============= TEST 2 - Fermeture binaire 3 ===============
@@ -481,14 +740,11 @@ void f_test_close_bin()
 
     close_bin3(img2, SIZE_TAB, SIZE_TAB, img2_o, img2_buf);
 
-    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1");
-    printf("\n");
+    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1"); printf("\n");
 
-    display_ui8matrix(img2_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Temporaire (Dilatation)");
-    printf("\n");
+    display_ui8matrix(img2_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Temporaire (Dilatation)"); printf("\n");
 
-    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Fermeture Binaire 3 (Dilatation + Erosion)");
-    printf("\n");
+    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Fermeture Binaire 3 (Dilatation + Erosion)"); printf("\n");
 
     //============= TEST 3 - Fermeture binaire 5 ===============
     img3[0][0] = 0; img3[0][1] = 0; img3[0][2] = 0; img3[0][3] = 0; img3[0][4] = 0; img3[0][5] = 0; img3[0][6] = 0; img3[0][7] = 0;
@@ -504,16 +760,45 @@ void f_test_close_bin()
 
     close_bin5(img3, SIZE_TAB, SIZE_TAB, img3_o, img3_buf);
 
-    display_ui8matrix(img3, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3");
-    printf("\n");
+    display_ui8matrix(img3, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3"); printf("\n");
 
-    display_ui8matrix(img3_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3 - Temporaire (Dilatation)");
-    printf("\n");
+    display_ui8matrix(img3_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3 - Temporaire (Dilatation)"); printf("\n");
 
-    display_ui8matrix(img3_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3 - Fermeture Binaire 5 (Dilatation + Erosion)");
-    printf("\n");
+    display_ui8matrix(img3_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3 - Fermeture Binaire 5 (Dilatation + Erosion)"); printf("\n");
 
     //============ DESALLOCATION MEMOIRE =============
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Reaffectation des pointeurs des bords pour la désallocation */
+        img1[i] = ptr_buff[23*j+0];
+        img2[i] = ptr_buff[23*j+1];
+        img3[i] = ptr_buff[23*j+2];
+        img4[i] = ptr_buff[23*j+3];
+        img1_buf[i] = ptr_buff[23*j+4];
+        img2_buf[i] = ptr_buff[23*j+5];
+        img3_buf[i] = ptr_buff[23*j+6];
+        img4_buf[i] = ptr_buff[23*j+7];
+        img1_o[i] = ptr_buff[23*j+8];
+        img2_o[i] = ptr_buff[23*j+9];
+        img3_o[i] = ptr_buff[23*j+10];
+        img4_o[i] = ptr_buff[23*j+11];
+
+        img1[SIZE_TAB-1 - i] = ptr_buff[23*j+12];
+        img2[SIZE_TAB-1 - i] = ptr_buff[23*j+13];
+        img3[SIZE_TAB-1 - i] = ptr_buff[23*j+14];
+        img4[SIZE_TAB-1 - i] = ptr_buff[23*j+15];
+        img1_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+16];
+        img2_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+17];
+        img3_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+18];
+        img4_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+19];
+        img1_o[SIZE_TAB-1 - i] = ptr_buff[23*j+20];
+        img2_o[SIZE_TAB-1 - i] = ptr_buff[23*j+21];
+        img3_o[SIZE_TAB-1 - i] = ptr_buff[23*j+22];
+        img4_o[SIZE_TAB-1 - i] = ptr_buff[23*j+23];
+
+        j++;
+    }
+
     free_ui8matrix(img1, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img2, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img3, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
@@ -547,6 +832,13 @@ void f_test_dilate()
     uint8_t** img3_o;
     uint8_t** img4_o;
 
+    char *format_f32= "%4.0f ";
+    char *format    = "%6.2f ";
+    int iter, niter = 10;
+    int run, nrun = 20;
+    double t0, t1, dt, tmin, t;
+    double cycles;
+
     /*------ Allocation image test ------*/
     img1 = ui8matrix(0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     img2 = ui8matrix(0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
@@ -559,7 +851,7 @@ void f_test_dilate()
     img4_o = ui8matrix(0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
 
     /*----- Initialisation image test -----*/
-    for(i=-BORD_TAB; i<=SIZE_TAB-1+BORD_TAB; i++)
+    for(i=0; i<=(SIZE_TAB-1); i++)
     {
         for(j=-BORD_TAB; j<=SIZE_TAB-1+BORD_TAB; j++)
         {
@@ -574,22 +866,64 @@ void f_test_dilate()
         }
     }
 
+    /* Bords haut et bas */
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Sauvegarde des pointeurs des bords pour la désallocation */
+        ptr_buff[16*j+0] = img1[i];
+        ptr_buff[16*j+1] = img2[i];
+        ptr_buff[16*j+2] = img3[i];
+        ptr_buff[16*j+3] = img4[i];
+        ptr_buff[16*j+4] = img1_o[i];
+        ptr_buff[16*j+5] = img2_o[i];
+        ptr_buff[16*j+6] = img3_o[i];
+        ptr_buff[16*j+7] = img4_o[i];
+
+        img1[i] = img1[0];
+        img2[i] = img2[0];
+        img3[i] = img3[0];
+        img4[i] = img4[0];
+        img1_o[i] = img1_o[0];
+        img2_o[i] = img2_o[0];
+        img3_o[i] = img3_o[0];
+        img4_o[i] = img4_o[0];
+
+        ptr_buff[16*j+8] = img1[SIZE_TAB-1 - i];
+        ptr_buff[16*j+9] = img2[SIZE_TAB-1 - i];
+        ptr_buff[16*j+10] = img3[SIZE_TAB-1 - i];
+        ptr_buff[16*j+11] = img4[SIZE_TAB-1 - i];
+        ptr_buff[16*j+12] = img1_o[SIZE_TAB-1 - i];
+        ptr_buff[16*j+13] = img2_o[SIZE_TAB-1 - i];
+        ptr_buff[16*j+14] = img3_o[SIZE_TAB-1 - i];
+        ptr_buff[16*j+15] = img4_o[SIZE_TAB-1 - i];
+
+        img1[SIZE_TAB-1 - i] = img1[SIZE_TAB-1];
+        img2[SIZE_TAB-1 - i] = img2[SIZE_TAB-1];
+        img3[SIZE_TAB-1 - i] = img3[SIZE_TAB-1];
+        img4[SIZE_TAB-1 - i] = img4[SIZE_TAB-1];
+        img1_o[SIZE_TAB-1 - i] = img1_o[SIZE_TAB-1];
+        img2_o[SIZE_TAB-1 - i] = img2_o[SIZE_TAB-1];
+        img3_o[SIZE_TAB-1 - i] = img3_o[SIZE_TAB-1];
+        img4_o[SIZE_TAB-1 - i] = img4_o[SIZE_TAB-1];
+        j++;
+    }
+
+
     /*------ Test fonctions ------*/
     //============= TEST 1 - Dilataion 3 ===============
     img1[2][2] = 56; img1[2][3] = 25; img1[2][4] = 32;
     img1[3][2] = 155; img1[3][3] = 255; img1[3][4] = 45;
     img1[4][2] = 95; img1[4][3] = 10; img1[4][4] = 120;
 
-    display_ui8matrix(img1, -BORD_TAB, SIZE_TAB-1+BORD_TAB, -BORD_TAB, SIZE_TAB-1+BORD_TAB," %d ","Tableau 1");
-    printf("\n======================\n");
+    DEBUG(display_ui8matrix(img1, -BORD_TAB, SIZE_TAB-1+BORD_TAB, -BORD_TAB, SIZE_TAB-1+BORD_TAB," %d ","Tableau 1"));
+    DEBUG(printf("\n======================\n"));
 
-    dilate3(img1, SIZE_TAB, SIZE_TAB, img1_o);
+    // dilate3(img1, SIZE_TAB, SIZE_TAB, img1_o);
+    CHRONO(dilate3(img1, SIZE_TAB, SIZE_TAB, img1_o),cycles);BENCH(printf("Dilatation3 : "));BENCH(printf(format, cycles/((SIZE_TAB)*(SIZE_TAB)))); BENCH(puts(""));
 
-    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1");
-    printf("\n");
+    DEBUG(display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1")); DEBUG(printf("\n"));
 
-    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1 - Dilatation 3");
-    printf("\n");
+    DEBUG(display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1 - Dilatation 3")); DEBUG(printf("\n"));
 
     //============= TEST 2 - Dilataion binaire 5 ===============
     img2[2][2] = 56; img2[2][3] = 25; img2[2][4] = 32;
@@ -597,16 +931,38 @@ void f_test_dilate()
     img2[4][2] = 95; img2[4][3] = 10; img2[4][4] = 120;
     img2[5][5] = 210;
 
-    dilate5(img2, SIZE_TAB, SIZE_TAB, img2_o);
+    // dilate5(img2, SIZE_TAB, SIZE_TAB, img2_o);
+    CHRONO(dilate5(img2, SIZE_TAB, SIZE_TAB, img2_o),cycles);BENCH(printf("Dilatation5 : "));BENCH(printf(format, cycles/((SIZE_TAB)*(SIZE_TAB)))); BENCH(puts(""));
 
-    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2");
-    printf("\n");
+    DEBUG(display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2")); DEBUG(printf("\n"));
 
-    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2 - Dilatation 5");
-    printf("\n");
+    DEBUG(display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2 - Dilatation 5")); DEBUG(printf("\n"));
 
 
     //============ DESALLOCATION MEMOIRE =============
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Reaffectation des pointeurs des bords pour la désallocation */
+        img1[i] = ptr_buff[16*j+0];
+        img2[i] = ptr_buff[16*j+1];
+        img3[i] = ptr_buff[16*j+2];
+        img4[i] = ptr_buff[16*j+3];
+        img1_o[i] = ptr_buff[16*j+4];
+        img2_o[i] = ptr_buff[16*j+5];
+        img3_o[i] = ptr_buff[16*j+6];
+        img4_o[i] = ptr_buff[16*j+7];
+
+        img1[SIZE_TAB-1 - i] = ptr_buff[16*j+8];
+        img2[SIZE_TAB-1 - i] = ptr_buff[16*j+9];
+        img3[SIZE_TAB-1 - i] = ptr_buff[16*j+10];
+        img4[SIZE_TAB-1 - i] = ptr_buff[16*j+11];
+        img1_o[SIZE_TAB-1 - i] = ptr_buff[16*j+12];
+        img2_o[SIZE_TAB-1 - i] = ptr_buff[16*j+13];
+        img3_o[SIZE_TAB-1 - i] = ptr_buff[16*j+14];
+        img4_o[SIZE_TAB-1 - i] = ptr_buff[16*j+15];
+        j++;
+    }
+
     free_ui8matrix(img1, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img2, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img3, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
@@ -646,7 +1002,7 @@ void f_test_erode()
     img4_o = ui8matrix(0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
 
     /*----- Initialisation image test -----*/
-    for(i=-BORD_TAB; i<=SIZE_TAB-1+BORD_TAB; i++)
+    for(i=0; i<=(SIZE_TAB-1); i++)
     {
         for(j=-BORD_TAB; j<=SIZE_TAB-1+BORD_TAB; j++)
         {
@@ -661,6 +1017,49 @@ void f_test_erode()
         }
     }
 
+    /* Bords haut et bas */
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Sauvegarde des pointeurs des bords pour la désallocation */
+        ptr_buff[16*j+0] = img1[i];
+        ptr_buff[16*j+1] = img2[i];
+        ptr_buff[16*j+2] = img3[i];
+        ptr_buff[16*j+3] = img4[i];
+        ptr_buff[16*j+4] = img1_o[i];
+        ptr_buff[16*j+5] = img2_o[i];
+        ptr_buff[16*j+6] = img3_o[i];
+        ptr_buff[16*j+7] = img4_o[i];
+
+        img1[i] = img1[0];
+        img2[i] = img2[0];
+        img3[i] = img3[0];
+        img4[i] = img4[0];
+        img1_o[i] = img1_o[0];
+        img2_o[i] = img2_o[0];
+        img3_o[i] = img3_o[0];
+        img4_o[i] = img4_o[0];
+
+        ptr_buff[16*j+8] = img1[SIZE_TAB-1 - i];
+        ptr_buff[16*j+9] = img2[SIZE_TAB-1 - i];
+        ptr_buff[16*j+10] = img3[SIZE_TAB-1 - i];
+        ptr_buff[16*j+11] = img4[SIZE_TAB-1 - i];
+        ptr_buff[16*j+12] = img1_o[SIZE_TAB-1 - i];
+        ptr_buff[16*j+13] = img2_o[SIZE_TAB-1 - i];
+        ptr_buff[16*j+14] = img3_o[SIZE_TAB-1 - i];
+        ptr_buff[16*j+15] = img4_o[SIZE_TAB-1 - i];
+
+        img1[SIZE_TAB-1 - i] = img1[SIZE_TAB-1];
+        img2[SIZE_TAB-1 - i] = img2[SIZE_TAB-1];
+        img3[SIZE_TAB-1 - i] = img3[SIZE_TAB-1];
+        img4[SIZE_TAB-1 - i] = img4[SIZE_TAB-1];
+        img1_o[SIZE_TAB-1 - i] = img1_o[SIZE_TAB-1];
+        img2_o[SIZE_TAB-1 - i] = img2_o[SIZE_TAB-1];
+        img3_o[SIZE_TAB-1 - i] = img3_o[SIZE_TAB-1];
+        img4_o[SIZE_TAB-1 - i] = img4_o[SIZE_TAB-1];
+        j++;
+    }
+
+
     /*------ Test fonctions ------*/
     //============= TEST 1 - Dilataion 3 ===============
     img1[1][1] = 2; img1[1][2] = 130; img1[1][3] = 12; img1[1][4] = 34; img1[1][5] = 75;
@@ -674,11 +1073,9 @@ void f_test_erode()
 
     erode3(img1, SIZE_TAB, SIZE_TAB, img1_o);
 
-    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1");
-    printf("\n");
+    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1"); printf("\n");
 
-    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1 - Dilatation 3");
-    printf("\n");
+    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1 - Dilatation 3"); printf("\n");
 
     //============= TEST 2 - Dilataion binaire 5 ===============
     img2[1][1] = 2; img2[1][2] = 130; img2[1][3] = 12; img2[1][4] = 34; img2[1][5] = 75;
@@ -690,13 +1087,34 @@ void f_test_erode()
 
     erode5(img2, SIZE_TAB, SIZE_TAB, img2_o);
 
-    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2");
-    printf("\n");
+    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2"); printf("\n");
 
-    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2 - Dilatation 5");
-    printf("\n");
+    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2 - Dilatation 5"); printf("\n");
 
     //============ DESALLOCATION MEMOIRE =============
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Reaffectation des pointeurs des bords pour la désallocation */
+        img1[i] = ptr_buff[16*j+0];
+        img2[i] = ptr_buff[16*j+1];
+        img3[i] = ptr_buff[16*j+2];
+        img4[i] = ptr_buff[16*j+3];
+        img1_o[i] = ptr_buff[16*j+4];
+        img2_o[i] = ptr_buff[16*j+5];
+        img3_o[i] = ptr_buff[16*j+6];
+        img4_o[i] = ptr_buff[16*j+7];
+
+        img1[SIZE_TAB-1 - i] = ptr_buff[16*j+8];
+        img2[SIZE_TAB-1 - i] = ptr_buff[16*j+9];
+        img3[SIZE_TAB-1 - i] = ptr_buff[16*j+10];
+        img4[SIZE_TAB-1 - i] = ptr_buff[16*j+11];
+        img1_o[SIZE_TAB-1 - i] = ptr_buff[16*j+12];
+        img2_o[SIZE_TAB-1 - i] = ptr_buff[16*j+13];
+        img3_o[SIZE_TAB-1 - i] = ptr_buff[16*j+14];
+        img4_o[SIZE_TAB-1 - i] = ptr_buff[16*j+15];
+        j++;
+    }
+
     free_ui8matrix(img1, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img2, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img3, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
@@ -746,7 +1164,7 @@ void f_test_open()
     img4_o = ui8matrix(0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
 
     /*----- Initialisation image test -----*/
-    for(i=-BORD_TAB; i<=SIZE_TAB-1+BORD_TAB; i++)
+    for(i=0; i<=(SIZE_TAB-1); i++)
     {
         for(j=-BORD_TAB; j<=SIZE_TAB-1+BORD_TAB; j++)
         {
@@ -765,6 +1183,64 @@ void f_test_open()
         }
     }
 
+    /* Bords haut et bas */
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Sauvegarde des pointeurs des bords pour la désallocation */
+        ptr_buff[23*j+0] = img1[i];
+        ptr_buff[23*j+1] = img2[i];
+        ptr_buff[23*j+2] = img3[i];
+        ptr_buff[23*j+3] = img4[i];
+        ptr_buff[23*j+4] = img1_buf[i];
+        ptr_buff[23*j+5] = img2_buf[i];
+        ptr_buff[23*j+6] = img3_buf[i];
+        ptr_buff[23*j+7] = img4_buf[i];
+        ptr_buff[23*j+8] = img1_o[i];
+        ptr_buff[23*j+9] = img2_o[i];
+        ptr_buff[23*j+10] = img3_o[i];
+        ptr_buff[23*j+11] = img4_o[i];
+
+        img1[i] = img1[0];
+        img2[i] = img2[0];
+        img3[i] = img3[0];
+        img4[i] = img4[0];
+        img1_buf[i] = img1_buf[0];
+        img2_buf[i] = img2_buf[0];
+        img3_buf[i] = img3_buf[0];
+        img4_buf[i] = img4_buf[0];
+        img1_o[i] = img1_o[0];
+        img2_o[i] = img2_o[0];
+        img3_o[i] = img3_o[0];
+        img4_o[i] = img4_o[0];
+
+        ptr_buff[23*j+12] = img1[SIZE_TAB-1 - i];
+        ptr_buff[23*j+13] = img2[SIZE_TAB-1 - i];
+        ptr_buff[23*j+14] = img3[SIZE_TAB-1 - i];
+        ptr_buff[23*j+15] = img4[SIZE_TAB-1 - i];
+        ptr_buff[23*j+16] = img1_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+17] = img2_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+18] = img3_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+19] = img4_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+20] = img1_o[SIZE_TAB-1 - i];
+        ptr_buff[23*j+21] = img2_o[SIZE_TAB-1 - i];
+        ptr_buff[23*j+22] = img3_o[SIZE_TAB-1 - i];
+        ptr_buff[23*j+23] = img4_o[SIZE_TAB-1 - i];
+
+        img1[SIZE_TAB-1 - i] = img1[SIZE_TAB-1];
+        img2[SIZE_TAB-1 - i] = img2[SIZE_TAB-1];
+        img3[SIZE_TAB-1 - i] = img3[SIZE_TAB-1];
+        img4[SIZE_TAB-1 - i] = img4[SIZE_TAB-1];
+        img1_buf[SIZE_TAB-1 - i] = img1_buf[SIZE_TAB-1];
+        img2_buf[SIZE_TAB-1 - i] = img2_buf[SIZE_TAB-1];
+        img3_buf[SIZE_TAB-1 - i] = img3_buf[SIZE_TAB-1];
+        img4_buf[SIZE_TAB-1 - i] = img4_buf[SIZE_TAB-1];
+        img1_o[SIZE_TAB-1 - i] = img1_o[SIZE_TAB-1];
+        img2_o[SIZE_TAB-1 - i] = img2_o[SIZE_TAB-1];
+        img3_o[SIZE_TAB-1 - i] = img3_o[SIZE_TAB-1];
+        img4_o[SIZE_TAB-1 - i] = img4_o[SIZE_TAB-1];
+        j++;
+    }
+
     /*------ Test fonctions ------*/
     //============= TEST 1 - Ouverture binaire 3 ===============
     img1[0][0] = 4;  img1[0][1] = 58;  img1[0][2] = 5;   img1[0][3] = 5;   img1[0][4] = 2;   img1[0][5] = 5;   img1[0][6] = 4;   img1[0][7] = 5;
@@ -781,14 +1257,11 @@ void f_test_open()
 
     open3(img1, SIZE_TAB, SIZE_TAB, img1_o, img1_buf);
 
-    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1");
-    printf("\n");
+    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1"); printf("\n");
 
-    display_ui8matrix(img1_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1 - Temporaire (Erosion)");
-    printf("\n");
+    display_ui8matrix(img1_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1 - Temporaire (Erosion)"); printf("\n");
 
-    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1 - Ouverture 3 (Erosion + Dilatation)");
-    printf("\n");
+    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1 - Ouverture 3 (Erosion + Dilatation)"); printf("\n");
 
     /*------ Test fonctions ------*/
     //============= TEST 2 - Ouverture binaire 3 ===============
@@ -805,14 +1278,11 @@ void f_test_open()
 
     open3(img2, SIZE_TAB, SIZE_TAB, img2_o, img2_buf);
 
-    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2");
-    printf("\n");
+    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2"); printf("\n");
 
-    display_ui8matrix(img2_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2 - Temporaire (Erosion)");
-    printf("\n");
+    display_ui8matrix(img2_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2 - Temporaire (Erosion)"); printf("\n");
 
-    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2 - Ouverture 3 (Erosion + Dilatation)");
-    printf("\n");
+    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2 - Ouverture 3 (Erosion + Dilatation)"); printf("\n");
 
     //============= TEST 3 - Ouverture binaire 5 ===============
     img3[0][0] = 4;   img3[0][1] = 240; img3[0][2] = 238; img3[0][3] = 248; img3[0][4] = 244; img3[0][5] = 239; img3[0][6] = 5;   img3[0][7] = 5;
@@ -828,16 +1298,45 @@ void f_test_open()
 
     open5(img3, SIZE_TAB, SIZE_TAB, img3_o, img3_buf);
 
-    display_ui8matrix(img3, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 3");
-    printf("\n");
+    display_ui8matrix(img3, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 3"); printf("\n");
 
-    display_ui8matrix(img3_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 3 - Temporaire (Erosion)");
-    printf("\n");
+    display_ui8matrix(img3_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 3 - Temporaire (Erosion)"); printf("\n");
 
-    display_ui8matrix(img3_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 3 - Ouverture Binaire 5 (Erosion + Dilatation)");
-    printf("\n");
+    display_ui8matrix(img3_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 3 - Ouverture Binaire 5 (Erosion + Dilatation)"); printf("\n");
 
     //============ DESALLOCATION MEMOIRE =============
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Reaffectation des pointeurs des bords pour la désallocation */
+        img1[i] = ptr_buff[23*j+0];
+        img2[i] = ptr_buff[23*j+1];
+        img3[i] = ptr_buff[23*j+2];
+        img4[i] = ptr_buff[23*j+3];
+        img1_buf[i] = ptr_buff[23*j+4];
+        img2_buf[i] = ptr_buff[23*j+5];
+        img3_buf[i] = ptr_buff[23*j+6];
+        img4_buf[i] = ptr_buff[23*j+7];
+        img1_o[i] = ptr_buff[23*j+8];
+        img2_o[i] = ptr_buff[23*j+9];
+        img3_o[i] = ptr_buff[23*j+10];
+        img4_o[i] = ptr_buff[23*j+11];
+
+        img1[SIZE_TAB-1 - i] = ptr_buff[23*j+12];
+        img2[SIZE_TAB-1 - i] = ptr_buff[23*j+13];
+        img3[SIZE_TAB-1 - i] = ptr_buff[23*j+14];
+        img4[SIZE_TAB-1 - i] = ptr_buff[23*j+15];
+        img1_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+16];
+        img2_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+17];
+        img3_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+18];
+        img4_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+19];
+        img1_o[SIZE_TAB-1 - i] = ptr_buff[23*j+20];
+        img2_o[SIZE_TAB-1 - i] = ptr_buff[23*j+21];
+        img3_o[SIZE_TAB-1 - i] = ptr_buff[23*j+22];
+        img4_o[SIZE_TAB-1 - i] = ptr_buff[23*j+23];
+
+        j++;
+    }
+
     free_ui8matrix(img1, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img2, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img3, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
@@ -893,7 +1392,7 @@ void f_test_close()
     img4_o = ui8matrix(0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
 
     /*----- Initialisation image test -----*/
-    for(i=-BORD_TAB; i<=SIZE_TAB-1+BORD_TAB; i++)
+    for(i=0; i<=(SIZE_TAB-1); i++)
     {
         for(j=-BORD_TAB; j<=SIZE_TAB-1+BORD_TAB; j++)
         {
@@ -912,6 +1411,64 @@ void f_test_close()
         }
     }
 
+    /* Bords haut et bas */
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Sauvegarde des pointeurs des bords pour la désallocation */
+        ptr_buff[23*j+0] = img1[i];
+        ptr_buff[23*j+1] = img2[i];
+        ptr_buff[23*j+2] = img3[i];
+        ptr_buff[23*j+3] = img4[i];
+        ptr_buff[23*j+4] = img1_buf[i];
+        ptr_buff[23*j+5] = img2_buf[i];
+        ptr_buff[23*j+6] = img3_buf[i];
+        ptr_buff[23*j+7] = img4_buf[i];
+        ptr_buff[23*j+8] = img1_o[i];
+        ptr_buff[23*j+9] = img2_o[i];
+        ptr_buff[23*j+10] = img3_o[i];
+        ptr_buff[23*j+11] = img4_o[i];
+
+        img1[i] = img1[0];
+        img2[i] = img2[0];
+        img3[i] = img3[0];
+        img4[i] = img4[0];
+        img1_buf[i] = img1_buf[0];
+        img2_buf[i] = img2_buf[0];
+        img3_buf[i] = img3_buf[0];
+        img4_buf[i] = img4_buf[0];
+        img1_o[i] = img1_o[0];
+        img2_o[i] = img2_o[0];
+        img3_o[i] = img3_o[0];
+        img4_o[i] = img4_o[0];
+
+        ptr_buff[23*j+12] = img1[SIZE_TAB-1 - i];
+        ptr_buff[23*j+13] = img2[SIZE_TAB-1 - i];
+        ptr_buff[23*j+14] = img3[SIZE_TAB-1 - i];
+        ptr_buff[23*j+15] = img4[SIZE_TAB-1 - i];
+        ptr_buff[23*j+16] = img1_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+17] = img2_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+18] = img3_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+19] = img4_buf[SIZE_TAB-1 - i];
+        ptr_buff[23*j+20] = img1_o[SIZE_TAB-1 - i];
+        ptr_buff[23*j+21] = img2_o[SIZE_TAB-1 - i];
+        ptr_buff[23*j+22] = img3_o[SIZE_TAB-1 - i];
+        ptr_buff[23*j+23] = img4_o[SIZE_TAB-1 - i];
+
+        img1[SIZE_TAB-1 - i] = img1[SIZE_TAB-1];
+        img2[SIZE_TAB-1 - i] = img2[SIZE_TAB-1];
+        img3[SIZE_TAB-1 - i] = img3[SIZE_TAB-1];
+        img4[SIZE_TAB-1 - i] = img4[SIZE_TAB-1];
+        img1_buf[SIZE_TAB-1 - i] = img1_buf[SIZE_TAB-1];
+        img2_buf[SIZE_TAB-1 - i] = img2_buf[SIZE_TAB-1];
+        img3_buf[SIZE_TAB-1 - i] = img3_buf[SIZE_TAB-1];
+        img4_buf[SIZE_TAB-1 - i] = img4_buf[SIZE_TAB-1];
+        img1_o[SIZE_TAB-1 - i] = img1_o[SIZE_TAB-1];
+        img2_o[SIZE_TAB-1 - i] = img2_o[SIZE_TAB-1];
+        img3_o[SIZE_TAB-1 - i] = img3_o[SIZE_TAB-1];
+        img4_o[SIZE_TAB-1 - i] = img4_o[SIZE_TAB-1];
+        j++;
+    }
+
     /*------ Test fonctions ------*/
     //============= TEST 1 - Fermeture binaire 3 ===============
     img1[0][0] = 14; img1[0][1] = 15; img1[0][2] = 15; img1[0][3] = 15; img1[0][4] = 15; img1[0][5] = 15; img1[0][6] = 15; img1[0][7] = 15;
@@ -928,14 +1485,11 @@ void f_test_close()
 
     close3(img1, SIZE_TAB, SIZE_TAB, img1_o, img1_buf);
 
-    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1");
-    printf("\n");
+    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1"); printf("\n");
 
-    display_ui8matrix(img1_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1 - Temporaire (Dilatation)");
-    printf("\n");
+    display_ui8matrix(img1_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1 - Temporaire (Dilatation)"); printf("\n");
 
-    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1 - Fermeture 3 (Dilatation + Erosion)");
-    printf("\n");
+    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1 - Fermeture 3 (Dilatation + Erosion)"); printf("\n");
 
     /*------ Test fonctions ------*/
     //============= TEST 2 - Fermeture binaire 3 ===============
@@ -952,14 +1506,11 @@ void f_test_close()
 
     close3(img2, SIZE_TAB, SIZE_TAB, img2_o, img2_buf);
 
-    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2");
-    printf("\n");
+    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2"); printf("\n");
 
-    display_ui8matrix(img2_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2 - Temporaire (Dilatation)");
-    printf("\n");
+    display_ui8matrix(img2_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2 - Temporaire (Dilatation)"); printf("\n");
 
-    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2 - Fermeture 3 (Dilatation + Erosion)");
-    printf("\n");
+    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2 - Fermeture 3 (Dilatation + Erosion)"); printf("\n");
 
     //============= TEST 3 - Fermeture binaire 5 ===============
     img3[0][0] = 25; img3[0][1] = 23; img3[0][2] = 25; img3[0][3] = 25; img3[0][4] = 25; img3[0][5] = 21; img3[0][6] = 25; img3[0][7] = 25;
@@ -975,16 +1526,45 @@ void f_test_close()
 
     close5(img3, SIZE_TAB, SIZE_TAB, img3_o, img3_buf);
 
-    display_ui8matrix(img3, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 3");
-    printf("\n");
+    display_ui8matrix(img3, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 3"); printf("\n");
 
-    display_ui8matrix(img3_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 3 - Temporaire (Dilatation)");
-    printf("\n");
+    display_ui8matrix(img3_buf, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 3 - Temporaire (Dilatation)"); printf("\n");
 
-    display_ui8matrix(img3_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 3 - Fermeture Binaire 5 (Dilatation + Erosion)");
-    printf("\n");
+    display_ui8matrix(img3_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 3 - Fermeture Binaire 5 (Dilatation + Erosion)"); printf("\n");
 
     //============ DESALLOCATION MEMOIRE =============
+    j = 0;
+    for(i = -BORD_TAB; i<0; i++){
+        /* Reaffectation des pointeurs des bords pour la désallocation */
+        img1[i] = ptr_buff[23*j+0];
+        img2[i] = ptr_buff[23*j+1];
+        img3[i] = ptr_buff[23*j+2];
+        img4[i] = ptr_buff[23*j+3];
+        img1_buf[i] = ptr_buff[23*j+4];
+        img2_buf[i] = ptr_buff[23*j+5];
+        img3_buf[i] = ptr_buff[23*j+6];
+        img4_buf[i] = ptr_buff[23*j+7];
+        img1_o[i] = ptr_buff[23*j+8];
+        img2_o[i] = ptr_buff[23*j+9];
+        img3_o[i] = ptr_buff[23*j+10];
+        img4_o[i] = ptr_buff[23*j+11];
+
+        img1[SIZE_TAB-1 - i] = ptr_buff[23*j+12];
+        img2[SIZE_TAB-1 - i] = ptr_buff[23*j+13];
+        img3[SIZE_TAB-1 - i] = ptr_buff[23*j+14];
+        img4[SIZE_TAB-1 - i] = ptr_buff[23*j+15];
+        img1_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+16];
+        img2_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+17];
+        img3_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+18];
+        img4_buf[SIZE_TAB-1 - i] = ptr_buff[23*j+19];
+        img1_o[SIZE_TAB-1 - i] = ptr_buff[23*j+20];
+        img2_o[SIZE_TAB-1 - i] = ptr_buff[23*j+21];
+        img3_o[SIZE_TAB-1 - i] = ptr_buff[23*j+22];
+        img4_o[SIZE_TAB-1 - i] = ptr_buff[23*j+23];
+
+        j++;
+    }
+
     free_ui8matrix(img1, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img2, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     free_ui8matrix(img3, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
@@ -1008,8 +1588,9 @@ void f_test_morpho()
     // f_test_erode_bin();
     // f_test_open_bin();
     // f_test_close_bin();
-    // f_test_dilate();
+
+    f_test_dilate();
     // f_test_erode();
-    f_test_open();
+    // f_test_open();
     // f_test_close();
 }
