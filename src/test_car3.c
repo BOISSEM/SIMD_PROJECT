@@ -372,8 +372,8 @@ void f_test_sd_morpho_car3(){
 }
 
 void f_test_mouvement_car3(){
-    //f_test_fd_car3();
-    f_test_sd_car3();
+    f_test_fd_car3();
+    //f_test_sd_car3();
     //f_test_fd_morpho_car3();
     //f_test_veriteTerrain();
 }

@@ -17,6 +17,7 @@
 #include "vnrutil.h"
 #include "mouvement_SSE2.h"
 #include "morpho_SSE2.h"
+#include "debug_macro.h"
 
 #define NB_IMAGE    200
 #define BORD_TAB    16
@@ -32,6 +33,13 @@ void f_test_fd_car3_SSE2()	{
     char img0_name[30];
     char img1_name[30];
     char img_out_name[60];
+
+    char *format_f32= "%4.0f ";
+    char *format    = "%6.2f ";
+    int iter, niter = 10;
+    int run, nrun = 20;
+    double t0, t1, dt, tmin, t;
+    double cycles;
 
     /*------------ Declaration tableau de vecteur ---------- */
     vuint8 **img_t0;
@@ -94,7 +102,10 @@ void f_test_fd_car3_SSE2()	{
 		MLoadPGM_ui8matrix(img0_name, 0, img_size_h-1, 0, img_size_l-1, v_img_t0);
 		MLoadPGM_ui8matrix(img1_name, 0, img_size_h-1, 0, img_size_l-1, v_img_t1);
 
-		routine_FrameDifference_SSE2(img_t1, img_t0, img_size_h, img_size_l, Ot, Et);
+		
+		BENCH(printf("Frame Difference : "));
+		CHRONO(routine_FrameDifference_SSE2(img_t1, img_t0, img_size_h, img_size_l/16, Ot, Et), cycles);BENCH(printf(format, cycles/((img_size_h+1-img_size_l)*(img_size_h+1-img_size_l)))); BENCH(puts(""));
+
 
 		sprintf(img_out_name, "img/car3_bin_FD_SSE2/car_%03d.pgm", 3000+i);
 		SavePGM_ui8matrix(v_Et, 0, img_size_h-1, 0, img_size_l-1, img_out_name);
@@ -112,6 +123,13 @@ void f_test_sd_car3_SSE2()	{
 	FILE* fp;
 	char img1_name[30];
 	char img_out_name[60];
+
+	char *format_f32= "%4.0f ";
+    char *format    = "%6.2f ";
+    int iter, niter = 10;
+    int run, nrun = 20;
+    double t0, t1, dt, tmin, t;
+    double cycles;
 
 	/*------------ Declaration tableau de vecteur ---------- */
     vuint8 **img_t1;
@@ -182,7 +200,9 @@ void f_test_sd_car3_SSE2()	{
 
 		MLoadPGM_ui8matrix(img1_name, 0, img_size_h-1, 0, img_size_l-1, v_img_t1);
 
-		SigmaDelta_1step_SSE2(img_t1, Ot, img_size_h, img_size_l, M, V, Et);
+		// BENCH(printf("Sigma Delta : "));
+		// CHRONO(SigmaDelta_1step_SSE2(img_t1, Ot, img_size_h, img_size_l, M, V, Et), cycles);BENCH(printf(format, cycles/((img_size_h+1-img_size_l)*(img_size_h+1-img_size_l)))); BENCH(puts(""));
+        SigmaDelta_1step_SSE2(img_t1, Ot, img_size_h, img_size_l, M, V, Et);
 
 		sprintf(img_out_name, "img/car3_bin_SD_SSE2/car_%03d.pgm", 3000+i);
 		SavePGM_ui8matrix(v_Et, 0, img_size_h-1, 0, img_size_l-1, img_out_name);
