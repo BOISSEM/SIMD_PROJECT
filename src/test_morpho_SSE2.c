@@ -526,9 +526,9 @@ void f_test_morpho_SSE2()
     // f_test_macro();
 
     /* Tests 3x3 */
-    // f_test_dilate3_SSE2();
+    f_test_dilate3_SSE2();
     // f_test_erode3_SSE2();
-    f_test_open3_SSE2();
+    // f_test_open3_SSE2();
     // f_test_close3_SSE2();
 
     /* Tests 5x5 */

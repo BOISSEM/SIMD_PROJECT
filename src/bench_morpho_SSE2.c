@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <x86intrin.h>
+#include <time.h>
 
 #include "debug_macro.h"
 
@@ -37,12 +38,16 @@ void f_bench_dilate3_SSE2(int nb_images)
     char* extension= "pgm";
 
     int file_nb = 3000;
-    int bord = 1;
+    int bord_i = 1, bord_j = 0;
     uint8_t **img_0, **img_out;
-    long nrl, nrh, ncl, nch;
+
+    int card;
+    int nrl, nrh, ncl, nch;
+    int vnrl, vnrh, vncl, vnch;
     vuint8 **v_img_0, **v_img_out;
 
-    char *format_f32= "%4.0f ";
+    card = card_vuint8();
+
     char *format    = "%6.2f ";
     int iter, niter = 10;
     int run, nrun = 20;
@@ -53,35 +58,103 @@ void f_bench_dilate3_SSE2(int nb_images)
     img_out_name = (char*) calloc(80, sizeof(char));
 
     generate_path_filename_k_ndigit_extension(path_file_in, filename, file_nb, 4, extension, img_in_name);
-    LoadPGM_ui8matrix(img_in_name, &nrl, &nrh, &ncl, &nch);
+    LoadPGM_ui8matrix(img_in_name, (long*)&nrl, (long*)&nrh, (long*)&ncl, (long*)&nch);
 
-    img_0 = ui8matrix(nrl-bord, nrh+bord, ncl-bord, nch+bord);
-    img_out = ui8matrix(nrl-bord, nrh+bord, ncl-bord, nch+bord);
+    s2v(nrl, nrh, ncl, nch, card, &vnrl, &vnrh, &vncl, &vnch);
 
-    v_img_0 = vui8matrix(nrl-bord, nrh+bord, ncl-bord, nch+bord);
-    v_img_out = vui8matrix(nrl-bord, nrh+bord, ncl-bord, nch+bord);
+    v_img_0 = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
+    v_img_out = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
 
     /* Bords haut et bas */
-    i1 = nrh;
-    for(i0 = nrl-bord; i0<nrl; i0++){
-        v_img_0[i0] = v_img_0[nrl];
-        v_img_out[i0] = v_img_out[nrl];
-        v_img_0[i1] = v_img_0[nrh];
-        v_img_out[i1] = v_img_out[nrh];
+    i1 = vnrh;
+    for(i0 = vnrl-bord_i; i0<vnrl; i0++){
+        v_img_0[i0] = v_img_0[vnrl];
+        v_img_out[i0] = v_img_out[vnrl];
+        v_img_0[i1] = v_img_0[vnrh];
+        v_img_out[i1] = v_img_out[vnrh];
         i1--;
     }
 
     img_0 = (uint8**)v_img_0;
     img_out = (uint8**)v_img_out;
 
-    i = 0;
-    // for(i=0; i<nb_images-1; i++)
+    // i = 0;
+    for(i=0; i<=nb_images-1; i++)
     {
         generate_path_filename_k_ndigit_extension(path_file_in, filename, file_nb+i, 4, extension, img_in_name);
 
         MLoadPGM_ui8matrix(img_in_name, nrl, nrh, ncl, nch, img_0);
 
-        CHRONO(dilate3_SSE2(v_img_0, nrh, nch, v_img_out),cycles);BENCH(printf(format, cycles/((nrh-nrl)*(nch-ncl)))); BENCH(puts(""));
+        BENCH(printf("Dilatation3 SSE2: "));
+        CHRONO(dilate3_SSE2(v_img_0, vnrh, vnch, v_img_out),cycles);BENCH(printf(format, cycles/((nrh+1-nrl)*(nch+1-ncl)))); BENCH(puts(""));
+        // CHRONO(dilate_bin3_SSE2(v_img_0, vnrh, vnch, v_img_out),cycles);BENCH(printf(format, cycles/((nrh+1-nrl)*(nch+1-ncl)))); BENCH(puts(""));
+
+        generate_path_filename_k_ndigit_extension(path_file_out, filename, file_nb+i, 4, extension, img_out_name);
+        SavePGM_ui8matrix(img_out, nrl, nrh, ncl, nch, img_out_name);
+    }
+}
+
+void f_bench_dilate5_SSE2(int nb_images)
+{
+    int i, i0, i1;
+
+    char *img_in_name, *img_out_name;
+    char* path_file_in = "img/car3_SD/";
+    char* path_file_out = "img/car3_SD_dilate5_SSE2/";
+    char* filename = "car_";
+    char* extension= "pgm";
+
+    int file_nb = 3000;
+    int bord_i = 2, bord_j = 0;
+    uint8_t **img_0, **img_out;
+
+    int card;
+    int nrl, nrh, ncl, nch;
+    int vnrl, vnrh, vncl, vnch;
+    vuint8 **v_img_0, **v_img_out;
+
+    card = card_vuint8();
+
+    char *format    = "%6.2f ";
+    int iter, niter = 10;
+    int run, nrun = 20;
+    double t0, t1, dt, tmin, t;
+    double cycles;
+
+    img_in_name = (char*) calloc(80, sizeof(char));
+    img_out_name = (char*) calloc(80, sizeof(char));
+
+    generate_path_filename_k_ndigit_extension(path_file_in, filename, file_nb, 4, extension, img_in_name);
+    LoadPGM_ui8matrix(img_in_name, (long*)&nrl, (long*)&nrh, (long*)&ncl, (long*)&nch);
+
+    s2v(nrl, nrh, ncl, nch, card, &vnrl, &vnrh, &vncl, &vnch);
+
+    v_img_0 = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
+    v_img_out = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
+
+    /* Bords haut et bas */
+    i1 = vnrh;
+    for(i0 = vnrl-bord_i; i0<vnrl; i0++){
+        v_img_0[i0] = v_img_0[vnrl];
+        v_img_out[i0] = v_img_out[vnrl];
+        v_img_0[i1] = v_img_0[vnrh];
+        v_img_out[i1] = v_img_out[vnrh];
+        i1--;
+    }
+
+    img_0 = (uint8**)v_img_0;
+    img_out = (uint8**)v_img_out;
+
+    // i = 0;
+    for(i=0; i<=nb_images-1; i++)
+    {
+        generate_path_filename_k_ndigit_extension(path_file_in, filename, file_nb+i, 4, extension, img_in_name);
+
+        MLoadPGM_ui8matrix(img_in_name, nrl, nrh, ncl, nch, img_0);
+
+        BENCH(printf("Dilatation5 SSE2: "));
+        CHRONO(dilate5_SSE2(v_img_0, vnrh, vnch, v_img_out),cycles);BENCH(printf(format, cycles/((nrh+1-nrl)*(nch+1-ncl)))); BENCH(puts(""));
+        // CHRONO(dilate_bin5_SSE2(v_img_0, vnrh, vnch, v_img_out),cycles);BENCH(printf(format, cycles/((nrh+1-nrl)*(nch+1-ncl)))); BENCH(puts(""));
 
         generate_path_filename_k_ndigit_extension(path_file_out, filename, file_nb+i, 4, extension, img_out_name);
         SavePGM_ui8matrix(img_out, nrl, nrh, ncl, nch, img_out_name);
@@ -99,10 +172,15 @@ void f_bench_dilate3_SSE2_opt(int nb_images)
     char* extension= "pgm";
 
     int file_nb = 3000;
-    int bord = 1;
+    int bord_i = 1, bord_j = 0;
     uint8_t **img_0, **img_out;
-    long nrl, nrh, ncl, nch;
+
+    int card;
+    int nrl, nrh, ncl, nch;
+    int vnrl, vnrh, vncl, vnch;
     vuint8 **v_img_0, **v_img_out;
+
+    card = card_vuint8();
 
     char *format    = "%6.2f ";
     int iter, niter = 10;
@@ -114,50 +192,259 @@ void f_bench_dilate3_SSE2_opt(int nb_images)
     img_out_name = (char*) calloc(80, sizeof(char));
 
     generate_path_filename_k_ndigit_extension(path_file_in, filename, file_nb, 4, extension, img_in_name);
-    LoadPGM_ui8matrix(img_in_name, &nrl, &nrh, &ncl, &nch);
+    LoadPGM_ui8matrix(img_in_name, (long*)&nrl, (long*)&nrh, (long*)&ncl, (long*)&nch);
 
-    img_0 = ui8matrix(nrl-bord, nrh+bord, ncl-bord, nch+bord);
-    img_out = ui8matrix(nrl-bord, nrh+bord, ncl-bord, nch+bord);
+    s2v(nrl, nrh, ncl, nch, card, &vnrl, &vnrh, &vncl, &vnch);
 
-    v_img_0 = vui8matrix(nrl-bord, nrh+bord, ncl-bord, nch+bord);
-    v_img_out = vui8matrix(nrl-bord, nrh+bord, ncl-bord, nch+bord);
+    v_img_0 = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
+    v_img_out = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
 
     /* Bords haut et bas */
-    i1 = nrh;
-    for(i0 = nrl-bord; i0<nrl; i0++){
-        v_img_0[i0] = v_img_0[nrl];
-        v_img_out[i0] = v_img_out[nrl];
-        v_img_0[i1] = v_img_0[nrh];
-        v_img_out[i1] = v_img_out[nrh];
+    i1 = vnrh;
+    for(i0 = vnrl-bord_i; i0<vnrl; i0++){
+        v_img_0[i0] = v_img_0[vnrl];
+        v_img_out[i0] = v_img_out[vnrl];
+        v_img_0[i1] = v_img_0[vnrh];
+        v_img_out[i1] = v_img_out[vnrh];
         i1--;
     }
 
     img_0 = (uint8**)v_img_0;
     img_out = (uint8**)v_img_out;
 
-    for(i=0; i<nb_images-1; i++)
+    // i = 0;
+    for(i=0; i<=nb_images-1; i++)
     {
         generate_path_filename_k_ndigit_extension(path_file_in, filename, file_nb+i, 4, extension, img_in_name);
 
         MLoadPGM_ui8matrix(img_in_name, nrl, nrh, ncl, nch, img_0);
 
-        CHRONO(dilate3_SSE2_opt(v_img_0, nrh, nch, v_img_out),cycles);BENCH(printf(format, cycles/((nrh-nrl)*(nch-ncl)))); BENCH(puts(""));
+        BENCH(printf("Dilatation3 SSE2 optimise: "));
+        CHRONO(dilate3_SSE2_opt(v_img_0, vnrh, vnch, v_img_out),cycles);BENCH(printf(format, cycles/((nrh+1-nrl)*(nch+1-ncl)))); BENCH(puts(""));
+        // CHRONO(dilate_bin3_SSE2_opt(v_img_0, vnrh, vnch, v_img_out),cycles);BENCH(printf(format, cycles/((nrh+1-nrl)*(nch+1-ncl)))); BENCH(puts(""));
 
         generate_path_filename_k_ndigit_extension(path_file_out, filename, file_nb+i, 4, extension, img_out_name);
         SavePGM_ui8matrix(img_out, nrl, nrh, ncl, nch, img_out_name);
     }
 }
 
+void f_bench_open3_SSE2(int nb_images)
+{
+    int i, i0, i1;
 
-void f_bench_morpho_SSE2(){
+    char *img_in_name, *img_out_name;
+    char* path_file_in = "img/car3_SD/";
+    char* path_file_out = "img/car3_SD_open3_SSE2/";
+    char* filename = "car_";
+    char* extension= "pgm";
+
+    int file_nb = 3000;
+    int bord_i = 1, bord_j = 0;
+    uint8_t **img_0, **img_out;
+
+    int card;
+    int nrl, nrh, ncl, nch;
+    int vnrl, vnrh, vncl, vnch;
+    vuint8 **v_img_0, **v_img_out, **v_buffer;
+
+    card = card_vuint8();
+
+    char *format    = "%6.2f ";
+    int iter, niter = 10;
+    int run, nrun = 20;
+    double t0, t1, dt, tmin, t;
+    double cycles;
+
+    img_in_name = (char*) calloc(80, sizeof(char));
+    img_out_name = (char*) calloc(80, sizeof(char));
+
+    generate_path_filename_k_ndigit_extension(path_file_in, filename, file_nb, 4, extension, img_in_name);
+    LoadPGM_ui8matrix(img_in_name, (long*)&nrl, (long*)&nrh, (long*)&ncl, (long*)&nch);
+
+    s2v(nrl, nrh, ncl, nch, card, &vnrl, &vnrh, &vncl, &vnch);
+
+    v_img_0 = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
+    v_img_out = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
+    v_buffer = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
+
+    /* Bords haut et bas */
+    i1 = vnrh;
+    for(i0 = vnrl-bord_i; i0<vnrl; i0++){
+        v_img_0[i0] = v_img_0[vnrl];
+        v_img_out[i0] = v_img_out[vnrl];
+        v_img_0[i1] = v_img_0[vnrh];
+        v_img_out[i1] = v_img_out[vnrh];
+        i1--;
+    }
+
+    img_0 = (uint8**)v_img_0;
+    img_out = (uint8**)v_img_out;
+
+    // i = 0;
+    for(i=0; i<=nb_images-1; i++)
+    {
+        generate_path_filename_k_ndigit_extension(path_file_in, filename, file_nb+i, 4, extension, img_in_name);
+
+        MLoadPGM_ui8matrix(img_in_name, nrl, nrh, ncl, nch, img_0);
+
+        BENCH(printf("Ouverture3 SSE2: "));
+        CHRONO(open3_SSE2(v_img_0, vnrh, vnch, v_img_out, v_buffer),cycles);BENCH(printf(format, cycles/((nrh+1-nrl)*(nch+1-ncl)))); BENCH(puts(""));
+        // CHRONO(open_bin3_SSE2(v_img_0, vnrh, vnch, v_img_out, v_buffer),cycles);BENCH(printf(format, cycles/((nrh+1-nrl)*(nch+1-ncl)))); BENCH(puts(""));
+
+        generate_path_filename_k_ndigit_extension(path_file_out, filename, file_nb+i, 4, extension, img_out_name);
+        SavePGM_ui8matrix(img_out, nrl, nrh, ncl, nch, img_out_name);
+    }
+}
+
+void f_bench_open3_SSE2_opt(int nb_images)
+{
+    int i, i0, i1;
+
+    char *img_in_name, *img_out_name;
+    char* path_file_in = "img/car3_SD/";
+    char* path_file_out = "img/car3_SD_open3_SSE2_opt/";
+    char* filename = "car_";
+    char* extension= "pgm";
+
+    int file_nb = 3000;
+    int bord_i = 1, bord_j = 0;
+    uint8_t **img_0, **img_out;
+
+    int card;
+    int nrl, nrh, ncl, nch;
+    int vnrl, vnrh, vncl, vnch;
+    vuint8 **v_img_0, **v_img_out, **v_buffer;
+
+    card = card_vuint8();
+
+    char *format    = "%6.2f ";
+    int iter, niter = 10;
+    int run, nrun = 20;
+    double t0, t1, dt, tmin, t;
+    double cycles;
+
+    img_in_name = (char*) calloc(80, sizeof(char));
+    img_out_name = (char*) calloc(80, sizeof(char));
+
+    generate_path_filename_k_ndigit_extension(path_file_in, filename, file_nb, 4, extension, img_in_name);
+    LoadPGM_ui8matrix(img_in_name, (long*)&nrl, (long*)&nrh, (long*)&ncl, (long*)&nch);
+
+    s2v(nrl, nrh, ncl, nch, card, &vnrl, &vnrh, &vncl, &vnch);
+
+    v_img_0 = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
+    v_img_out = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
+    v_buffer = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
+
+    /* Bords haut et bas */
+    i1 = vnrh;
+    for(i0 = vnrl-bord_i; i0<vnrl; i0++){
+        v_img_0[i0] = v_img_0[vnrl];
+        v_img_out[i0] = v_img_out[vnrl];
+        v_img_0[i1] = v_img_0[vnrh];
+        v_img_out[i1] = v_img_out[vnrh];
+        i1--;
+    }
+
+    img_0 = (uint8**)v_img_0;
+    img_out = (uint8**)v_img_out;
+
+    // i = 0;
+    for(i=0; i<=nb_images-1; i++)
+    {
+        generate_path_filename_k_ndigit_extension(path_file_in, filename, file_nb+i, 4, extension, img_in_name);
+
+        MLoadPGM_ui8matrix(img_in_name, nrl, nrh, ncl, nch, img_0);
+
+        BENCH(printf("Ouverture3 SSE2 optimise: "));
+        CHRONO(open3_SSE2_opt(v_img_0, vnrh, vnch, v_img_out,v_buffer),cycles);BENCH(printf(format, cycles/((nrh+1-nrl)*(nch+1-ncl)))); BENCH(puts(""));
+        // CHRONO(open_bin3_SSE2_opt(v_img_0, vnrh, vnch, v_img_out, v_buffer),cycles);BENCH(printf(format, cycles/((nrh+1-nrl)*(nch+1-ncl)))); BENCH(puts(""));
+
+        generate_path_filename_k_ndigit_extension(path_file_out, filename, file_nb+i, 4, extension, img_out_name);
+        SavePGM_ui8matrix(img_out, nrl, nrh, ncl, nch, img_out_name);
+    }
+}
+
+void f_bench_open3_SSE2_opt_no_pipe(int nb_images)
+{
+    int i, i0, i1;
+
+    char *img_in_name, *img_out_name;
+    char* path_file_in = "img/car3_SD/";
+    char* path_file_out = "img/car3_SD_open3_SSE2_opt_no_pipe/";
+    char* filename = "car_";
+    char* extension= "pgm";
+
+    int file_nb = 3000;
+    int bord_i = 1, bord_j = 0;
+    uint8_t **img_0, **img_out;
+
+    int card;
+    int nrl, nrh, ncl, nch;
+    int vnrl, vnrh, vncl, vnch;
+    vuint8 **v_img_0, **v_img_out, **v_buffer;
+
+    card = card_vuint8();
+
+    char *format    = "%6.2f ";
+    int iter, niter = 10;
+    int run, nrun = 20;
+    double t0, t1, dt, tmin, t;
+    double cycles;
+
+    img_in_name = (char*) calloc(80, sizeof(char));
+    img_out_name = (char*) calloc(80, sizeof(char));
+
+    generate_path_filename_k_ndigit_extension(path_file_in, filename, file_nb, 4, extension, img_in_name);
+    LoadPGM_ui8matrix(img_in_name, (long*)&nrl, (long*)&nrh, (long*)&ncl, (long*)&nch);
+
+    s2v(nrl, nrh, ncl, nch, card, &vnrl, &vnrh, &vncl, &vnch);
+
+    v_img_0 = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
+    v_img_out = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
+    v_buffer = vui8matrix(vnrl-bord_i, vnrh+bord_i, vncl-bord_j, vnch+bord_j);
+
+    /* Bords haut et bas */
+    i1 = vnrh;
+    for(i0 = vnrl-bord_i; i0<vnrl; i0++){
+        v_img_0[i0] = v_img_0[vnrl];
+        v_img_out[i0] = v_img_out[vnrl];
+        v_img_0[i1] = v_img_0[vnrh];
+        v_img_out[i1] = v_img_out[vnrh];
+        i1--;
+    }
+
+    img_0 = (uint8**)v_img_0;
+    img_out = (uint8**)v_img_out;
+
+    // i = 0;
+    for(i=0; i<=nb_images-1; i++)
+    {
+        generate_path_filename_k_ndigit_extension(path_file_in, filename, file_nb+i, 4, extension, img_in_name);
+
+        MLoadPGM_ui8matrix(img_in_name, nrl, nrh, ncl, nch, img_0);
+
+        BENCH(printf("Ouverture3 SSE2 optimise (sans pipeline): "));
+        CHRONO(open3_SSE2_opt_no_pipe(v_img_0, vnrh, vnch, v_img_out,v_buffer),cycles);BENCH(printf(format, cycles/((nrh+1-nrl)*(nch+1-ncl)))); BENCH(puts(""));
+        // CHRONO(open_bin3_SSE2_opt_no_pipe(v_img_0, vnrh, vnch, v_img_out, v_buffer),cycles);BENCH(printf(format, cycles/((nrh+1-nrl)*(nch+1-ncl)))); BENCH(puts(""));
+
+        generate_path_filename_k_ndigit_extension(path_file_out, filename, file_nb+i, 4, extension, img_out_name);
+        SavePGM_ui8matrix(img_out, nrl, nrh, ncl, nch, img_out_name);
+    }
+}
+
+void f_bench_morpho_SSE2(int nb_images){
     // char *format = "%6.2f ";
     // int iter, niter = 2;
     // int run, nrun = 5;
     // double t0, t1, dt, tmin, t;
     // double cycles;
 
-    // CHRONO(f_bench_dilate3(198),cycles); BENCH(printf(format, cycles/(198*320*240))); BENCH(puts(""));
-    f_bench_dilate3_SSE2(198);
-    f_bench_dilate3_SSE2_opt(198);
-    // f_bench_dilate5_SSE2(198);
+    // CHRONO(f_bench_dilate3(nb_images),cycles); BENCH(printf(format, cycles/(198*320*240))); BENCH(puts(""));
+    f_bench_dilate3_SSE2(nb_images);
+    f_bench_dilate3_SSE2_opt(nb_images);
+    f_bench_dilate5_SSE2(nb_images);
+
+    f_bench_open3_SSE2(nb_images);
+    f_bench_open3_SSE2_opt(nb_images);
+    f_bench_open3_SSE2_opt_no_pipe(nb_images);
 }

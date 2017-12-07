@@ -10,14 +10,14 @@
 
 #define ZERO zero_f32matrix(Z, 0, n-1, 0, n-1)
 
-// #define ENABLE_BENCHMARK
+#define ENABLE_BENCHMARK
+// #define ENABLE_DEBUG
 
 // -------------------------------------------
 // -- ne rien ecrire en dessous de cette ligne
 // -------------------------------------------
 
 #ifdef ENABLE_BENCHMARK
-
 #pragma message("ENABLE_BENCHMARK is ON")
 
 // check predef
@@ -51,12 +51,24 @@
 #define DEBUG(X)
 
 #else
-
 #pragma message("ENABLE_BENCHMARK is OFF")
+
+#ifdef ENABLE_DEBUG
+#pragma message("ENABLE_DEBUG is ON")
 
 #define CHRONO(X,t)  X
 #define BENCH(X)
 #define DEBUG(X) X
-#endif
+
+#else
+#pragma message("ENABLE_DEBUG is OFF")
+
+#define CHRONO(X,t)  X
+#define BENCH(X)
+#define DEBUG(X)
+
+#endif // ENABLE_DEBUG
+
+#endif // ENABLE_BENCHMARK
 
 #endif // __DEBUG_MACRO_H__

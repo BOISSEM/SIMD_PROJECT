@@ -43,6 +43,8 @@
 #define vec_add3(x0, x1, x2) (_mm_add_epi8(_mm_add_epi8(x0, x1), x2))
 #define vec_add5(x0, x1, x2, x3, x4) (_mm_add_epi8(_mm_add_epi8(_mm_add_epi8(_mm_add_epi8(x0, x1), x2), x3), x4))
 
+#define vec_or3(x0, x1, x2) (_mm_or_si128(_mm_or_si128(x0, x1), x2))
+
 #define vec_min3(x0, x1, x2) (_mm_min_epu8(_mm_min_epu8(x0, x1), x2))
 #define vec_min5(x0, x1, x2, x3, x4) (_mm_min_epu8(_mm_min_epu8(_mm_min_epu8(_mm_min_epu8(x0, x1), x2), x3), x4))
 

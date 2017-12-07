@@ -18,6 +18,8 @@
 #include "nrdef.h"
 #include "nrutil.h"
 
+#include "debug_macro.h"
+
 #define SIZE_TAB    8
 #define BORD_TAB    2
 
@@ -114,14 +116,13 @@ void f_test_dilate_bin()
     //============= TEST 1 - Dilataion binaire 3 ===============
     img1[3][3] = 1;
 
-    display_ui8matrix(img1, -BORD_TAB, SIZE_TAB-1+BORD_TAB, -BORD_TAB, SIZE_TAB-1+BORD_TAB," %d ","Tableau 1");
-    printf("\n======================\n");
+    DEBUG(display_ui8matrix(img1, -BORD_TAB, SIZE_TAB-1+BORD_TAB, -BORD_TAB, SIZE_TAB-1+BORD_TAB," %d ","Tableau 1"));
+    DEBUG(printf("\n======================\n"));
 
     dilate_bin3(img1, SIZE_TAB, SIZE_TAB, img1_o);
 
-    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1"); printf("\n");
-
-    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Dilatation Binaire 3"); printf("\n");
+    DEBUG(display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1")); DEBUG(printf("\n"));
+    DEBUG(display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 1 - Dilatation Binaire 3")); DEBUG(printf("\n"));
 
 
     //============= TEST 2 - Dilataion binaire 3 ===============
@@ -131,18 +132,16 @@ void f_test_dilate_bin()
 
     dilate_bin3(img2, SIZE_TAB, SIZE_TAB, img2_o);
 
-    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2"); printf("\n");
-
-    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2 - Dilatation Binaire 3"); printf("\n");
+    DEBUG(display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2")); DEBUG(printf("\n"));
+    DEBUG(display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 2 - Dilatation Binaire 3")); DEBUG(printf("\n"));
 
     //============= TEST 3 - Dilataion binaire 5 ===============
     img3[3][3] = 1;
 
     dilate_bin5(img3, SIZE_TAB, SIZE_TAB, img3_o);
 
-    display_ui8matrix(img3, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3"); printf("\n");
-
-    display_ui8matrix(img3_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3 - Dilatation Binaire 5"); printf("\n");
+    DEBUG(display_ui8matrix(img3, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3")); DEBUG(printf("\n"));
+    DEBUG(display_ui8matrix(img3_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 3 - Dilatation Binaire 5")); DEBUG(printf("\n"));
 
     //============= TEST 4 - Dilataion binaire 5 ===============
     img4[0][1] = 1;
@@ -150,9 +149,8 @@ void f_test_dilate_bin()
 
     dilate_bin5(img4, SIZE_TAB, SIZE_TAB, img4_o);
 
-    display_ui8matrix(img4, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 4"); printf("\n");
-
-    display_ui8matrix(img4_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 4 - Dilatation Binaire 5"); printf("\n");
+    DEBUG(display_ui8matrix(img4, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 4")); DEBUG(printf("\n"));
+    DEBUG(display_ui8matrix(img4_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %d ","Tableau 4 - Dilatation Binaire 5")); DEBUG(printf("\n"));
 
     //============ DESALLOCATION MEMOIRE =============
     j = 0;
@@ -834,6 +832,13 @@ void f_test_dilate()
     uint8_t** img3_o;
     uint8_t** img4_o;
 
+    char *format_f32= "%4.0f ";
+    char *format    = "%6.2f ";
+    int iter, niter = 10;
+    int run, nrun = 20;
+    double t0, t1, dt, tmin, t;
+    double cycles;
+
     /*------ Allocation image test ------*/
     img1 = ui8matrix(0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
     img2 = ui8matrix(0-BORD_TAB, SIZE_TAB-1+BORD_TAB, 0-BORD_TAB, SIZE_TAB-1+BORD_TAB);
@@ -910,14 +915,15 @@ void f_test_dilate()
     img1[3][2] = 155; img1[3][3] = 255; img1[3][4] = 45;
     img1[4][2] = 95; img1[4][3] = 10; img1[4][4] = 120;
 
-    display_ui8matrix(img1, -BORD_TAB, SIZE_TAB-1+BORD_TAB, -BORD_TAB, SIZE_TAB-1+BORD_TAB," %d ","Tableau 1");
-    printf("\n======================\n");
+    DEBUG(display_ui8matrix(img1, -BORD_TAB, SIZE_TAB-1+BORD_TAB, -BORD_TAB, SIZE_TAB-1+BORD_TAB," %d ","Tableau 1"));
+    DEBUG(printf("\n======================\n"));
 
-    dilate3(img1, SIZE_TAB, SIZE_TAB, img1_o);
+    // dilate3(img1, SIZE_TAB, SIZE_TAB, img1_o);
+    CHRONO(dilate3(img1, SIZE_TAB, SIZE_TAB, img1_o),cycles);BENCH(printf("Dilatation3 : "));BENCH(printf(format, cycles/((SIZE_TAB)*(SIZE_TAB)))); BENCH(puts(""));
 
-    display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1"); printf("\n");
+    DEBUG(display_ui8matrix(img1, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1")); DEBUG(printf("\n"));
 
-    display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1 - Dilatation 3"); printf("\n");
+    DEBUG(display_ui8matrix(img1_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 1 - Dilatation 3")); DEBUG(printf("\n"));
 
     //============= TEST 2 - Dilataion binaire 5 ===============
     img2[2][2] = 56; img2[2][3] = 25; img2[2][4] = 32;
@@ -925,11 +931,12 @@ void f_test_dilate()
     img2[4][2] = 95; img2[4][3] = 10; img2[4][4] = 120;
     img2[5][5] = 210;
 
-    dilate5(img2, SIZE_TAB, SIZE_TAB, img2_o);
+    // dilate5(img2, SIZE_TAB, SIZE_TAB, img2_o);
+    CHRONO(dilate5(img2, SIZE_TAB, SIZE_TAB, img2_o),cycles);BENCH(printf("Dilatation5 : "));BENCH(printf(format, cycles/((SIZE_TAB)*(SIZE_TAB)))); BENCH(puts(""));
 
-    display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2"); printf("\n");
+    DEBUG(display_ui8matrix(img2, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2")); DEBUG(printf("\n"));
 
-    display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2 - Dilatation 5"); printf("\n");
+    DEBUG(display_ui8matrix(img2_o, 0, SIZE_TAB-1, 0, SIZE_TAB-1," %3d ","Tableau 2 - Dilatation 5")); DEBUG(printf("\n"));
 
 
     //============ DESALLOCATION MEMOIRE =============
@@ -1578,11 +1585,11 @@ void f_test_close()
 void f_test_morpho()
 {
     // f_test_dilate_bin();
-    f_test_erode_bin();
+    // f_test_erode_bin();
     // f_test_open_bin();
     // f_test_close_bin();
 
-    // f_test_dilate();
+    f_test_dilate();
     // f_test_erode();
     // f_test_open();
     // f_test_close();

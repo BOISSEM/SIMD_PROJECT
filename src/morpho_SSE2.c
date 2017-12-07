@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <x86intrin.h>
 
 #include "debug_macro.h"
 
@@ -20,6 +21,72 @@
 
 #include "simd_macro.h"
 #include "morpho_SSE2.h"
+
+
+/**
+ *  (SIMD) Dilataion binaire d'une image avec un élément structurant de taille 3x3
+ *
+ *  @param  src     Image source
+ *  @param  size_h  Hauteur de l'image
+ *  @param  size_l  Largeur de l'image
+ *  @param  dest    Image dilatee
+ */
+void dilate_bin3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest)
+{
+    int i, j;
+    int di, dj;
+    vuint8 x_1, x0, x1;
+    vuint8 xl, xr;
+    vuint8 y;
+    vuint8 dilat;
+    vuint8 bord_l;
+
+    vuint8 buf1, buf2;
+    // Parcours image
+
+    for(i = 0; i <= (size_h-1); i++)
+    {
+        for(j = 0; j <= (size_l-1); j++)
+        {
+            dilat = _mm_set1_epi8((uint8_t)0);
+
+            for(di = -1; di <= 1; di++)
+            {
+                x0  = _mm_load_si128(&src[i+di][j+0]);
+
+                if(j == 0)
+                {
+                    xr = vec_dup_bord_l1(x0);
+                }
+                else
+                {
+                    x_1 = _mm_load_si128(&src[i+di][j-1]);
+                    xr = vec_right1(x_1, x0);
+                }
+
+                if(j == (size_l-1))
+                {
+                    xl = vec_dup_bord_r1(x0);
+                }
+                else
+                {
+                    x1  = _mm_load_si128(&src[i+di][j+1]);
+                    xl = vec_left1(x0, x1);
+                }
+
+
+                DEBUG(display_vuint8(xr, "%3d", " xr = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(x0, "%3d", " x0 = "));DEBUG(puts(""));
+                DEBUG(display_vuint8(xl, "%3d", " xl = "));DEBUG(puts("\n"));
+
+                y = vec_or3(xl, x0, xr);
+                dilat = _mm_or_si128(dilat, y);
+            }
+            DEBUG(display_vuint8(dilat, "%3d", " dilat = "));DEBUG(puts("\n"));
+            _mm_store_si128(&dest[i][j], dilat);
+        }
+    }
+}
 
 /**
  *  (SIMD) Dilataion d'une image avec un élément structurant de taille 3x3
@@ -41,21 +108,33 @@ void dilate3_SSE2(vuint8** src, int size_h, int size_l, vuint8** dest)
     // Parcours image
     for(i = 0; i <= (size_h-1); i++)
     {
-        // bord_l = _mm_load_si128(&src[i+di][j-1]);
-        // vec_left1(vec_dup_bord_l1())
         for(j = 0; j <= (size_l-1); j++)
         {
             dilat = _mm_set1_epi8((uint8_t)0);
 
             for(di = -1; di <= 1; di++)
             {
-                x_1 = _mm_load_si128(&src[i+di][j-1]);
                 x0  = _mm_load_si128(&src[i+di][j+0]);
-                x1  = _mm_load_si128(&src[i+di][j+1]);
 
-                xr = vec_right1(x_1, x0);
-                xl = vec_left1(x0, x1);
+                if(j == 0)
+                {
+                    xr = vec_dup_bord_l1(x0);
+                }
+                else
+                {
+                    x_1 = _mm_load_si128(&src[i+di][j-1]);
+                    xr = vec_right1(x_1, x0);
+                }
 
+                if(j == (size_l-1))
+                {
+                    xl = vec_dup_bord_r1(x0);
+                }
+                else
+                {
+                    x1  = _mm_load_si128(&src[i+di][j+1]);
+                    xl = vec_left1(x0, x1);
+                }
                 DEBUG(display_vuint8(xr, "%3d", " xr = "));DEBUG(puts(""));
                 DEBUG(display_vuint8(x0, "%3d", " x0 = "));DEBUG(puts(""));
                 DEBUG(display_vuint8(xl, "%3d", " xl = "));DEBUG(puts("\n"));
