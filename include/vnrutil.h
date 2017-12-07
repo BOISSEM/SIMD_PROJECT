@@ -19,16 +19,16 @@ extern "C" {
 #include <xmmintrin.h>
 #include <emmintrin.h>
 #include <mmintrin.h>
-
+    
 #include "nrdef.h"
 #include "vnrdef.h"
-
-
+    
+    
 //#pragma message(" - include vnralloc.h")
-
+    
 //#include "vdef.h"
 //#define LINEAR_ALLOCATION 1
-
+    
 /*
  * ifdef: contiguous memory allocation
  * from one line to an other
@@ -200,6 +200,7 @@ void zero_vui16matrix(vuint16  **m, int i0, int i1, int j0, int j1);
 void zero_vsi32matrix(vsint32  **m, int i0, int i1, int j0, int j1);
 void zero_vui32matrix(vuint32  **m, int i0, int i1, int j0, int j1);
 void zero_vf32matrix (vfloat32 **m, int i0, int i1, int j0, int j1);
+
 
 #ifdef __cplusplus
 }
