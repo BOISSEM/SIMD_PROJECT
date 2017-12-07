@@ -71,4 +71,8 @@
 
 #endif // ENABLE_BENCHMARK
 
+<<<<<<< HEAD
 #endif // __DEBUG_MACRO_H__
+=======
+#endif // __DEBUG_MACRO_H__
+>>>>>>> b9d8ab4aef9935398566587dfa0c9717b4e68182

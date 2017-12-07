@@ -192,17 +192,17 @@ vuint8** SigmaDelta_1step_SSE2(vuint8** It_1, vuint8** Ot,
 	for(i = 0; i < size_h; i++)	{
 		for(j = 0; j <= size_l; j++)	{
 			//Load
-			v_it_1 = _mm_load_si128(&It_1[i][j]);
+			v_ot = _mm_load_si128(&Ot[i][j]);
 			v_var = _mm_load_si128(&V[i][j]);
 
 			// a <- N x It_1
-			a = v_it_1;
+			a = v_ot;
 			for(k = 0; k < N; k++)	{
-				v_it_1 = _mm_adds_epu8(v_it_1, a);
+				v_ot = _mm_adds_epu8(v_ot, a);
 			}
 			// non signés -> signés (à quoi ça sert de signer V puisqu'il depasse pas VMAX < 128 ?)
 			v_varS = _mm_sub_epi8(v_var, v_128);
-			v_it_1S = _mm_sub_epi8(v_it_1, v_128);
+			v_it_1S = _mm_sub_epi8(v_ot, v_128);
 
 			// a <- 255 si V < NxIt_1
 			//		0	sinon 
@@ -387,10 +387,10 @@ vuint8** SigmaDelta_1step_SSE2_Archi(vuint8** It_1, vuint8** Ot,
 			// a <- abs(M, It_1)
 			// Load
 			v_m = _mm_load_si128(&M[i][j]);
-			v_it_1 = _mm_load_si128(&It_1[i][j]);
+			v_ot = _mm_load_si128(&Ot[i][j]);
 			// a <- abs(M, It_1)
-			a = _mm_min_epu8(v_m, v_it_1);
-			b = _mm_max_epu8(v_it_1, v_m);
+			a = _mm_min_epu8(v_m, v_ot);
+			b = _mm_max_epu8(v_ot, v_m);
 			a = _mm_sub_epi8(b, a);
 			// Ot <- a
 			_mm_store_si128(&Ot[i][j], a);
@@ -399,17 +399,17 @@ vuint8** SigmaDelta_1step_SSE2_Archi(vuint8** It_1, vuint8** Ot,
 			// Step#3: Vt update and clamping
 			// a <- N x It_1
 			//Load
-			v_it_1 = _mm_load_si128(&It_1[i][j]);
+			v_ot = _mm_load_si128(&Ot[i][j]);
 			v_var = _mm_load_si128(&V[i][j]);
 
 			// a <- N x It_1
-			a = v_it_1;
+			a = v_ot;
 			for(k = 0; k < N; k++)	{
-				v_it_1 = _mm_adds_epu8(v_it_1, a);
+				v_ot = _mm_adds_epu8(v_ot, a);
 			}
 			// non signés -> signés (à quoi ça sert de signer V puisqu'il depasse pas VMAX < 128 ?)
 			v_varS = _mm_sub_epi8(v_var, v_128);
-			v_it_1S = _mm_sub_epi8(v_it_1, v_128);
+			v_it_1S = _mm_sub_epi8(v_ot, v_128);
 
 			// a <- 255 si V < NxIt_1
 			//		0	sinon 

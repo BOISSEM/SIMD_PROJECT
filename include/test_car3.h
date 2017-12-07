@@ -12,6 +12,4 @@
 
 void f_test_mouvement_car3(int nb_images);
 
-uint8_t** copy_pgm_matrix(char* fname, uint8_t** image, int size_h, int size_l);
-
 #endif //__CAR3_H__

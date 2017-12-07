@@ -103,9 +103,9 @@ uint8_t** SigmaDelta_1step(uint8_t** It_1, uint8_t** Ot, int size_h, int size_l,
 	// Step#3: Vt update and clamping
 	for(i = 0; i < size_h; i++)	{
 		for(j = 0; j < size_l; j++)	{
-			if(V[i][j] < N*It_1[i][j])
+			if(V[i][j] < N*Ot[i][j])
 				V[i][j] = V[i][j] + 1;
-			else if(V[i][j] > N*It_1[i][j])
+			else if(V[i][j] > N*Ot[i][j])
 				V[i][j] = V[i][j] - 1;
 			// Clamp to [VMIN, VMAX]
 			V[i][j] = max(min(V[i][j], VMAX), VMIN);
