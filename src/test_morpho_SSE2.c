@@ -524,13 +524,9 @@ void f_test_morpho_SSE2()
     f_test_open3_SSE2();
     // f_test_close3_SSE2();
 
-<<<<<<< HEAD
-}
-=======
     /* Tests 5x5 */
     // f_test_dilate5_SSE2();
     // f_test_erode5_SSE2();
     // f_test_open5_SSE2();
     // f_test_close5_SSE2();
 }
->>>>>>> morpho_1
